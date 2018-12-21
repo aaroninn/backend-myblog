@@ -1,0 +1,117 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /user/login               --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.loginHandler)-fm (5 handlers)
+[GIN-debug] POST   /user/register            --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.registerHandler)-fm (5 handlers)
+[GIN-debug] PUT    /user/password            --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.updatePasswordHandler)-fm (6 handlers)
+[GIN-debug] POST   /blog                     --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.createBlog)-fm (6 handlers)
+[GIN-debug] GET    /blog                     --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogsByUser)-fm (6 handlers)
+[GIN-debug] GET    /blog/id/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogByID)-fm (5 handlers)
+[GIN-debug] GET    /blog/title/:title        --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogsByTitle)-fm (5 handlers)
+[GIN-debug] GET    /blog/userid/:userid      --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogByUserID)-fm (5 handlers)
+[GIN-debug] PUT    /blog/:id                 --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.updateBlog)-fm (6 handlers)
+[GIN-debug] DELETE /blog/id/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteBlogByID)-fm (6 handlers)
+[GIN-debug] DELETE /blog/userid/:userid      --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteBlogsByUserID)-fm (6 handlers)
+[GIN-debug] POST   /comment                  --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.createComment)-fm (6 handlers)
+[GIN-debug] GET    /comment/id/:id           --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findCommentByID)-fm (5 handlers)
+[GIN-debug] GET    /comment/userid/:userid   --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findCommentsByUserID)-fm (6 handlers)
+[GIN-debug] PUT    /comment/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.updateComment)-fm (6 handlers)
+[GIN-debug] DELETE /comment/id/:id           --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteCommentByID)-fm (6 handlers)
+[GIN-debug] DELETE /comment/userid/:userid   --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteCommentsByUserID)-fm (6 handlers)
+[GIN-debug] Listening and serving HTTP on 0.0.0.0:5000
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /user/login               --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.loginHandler)-fm (5 handlers)
+[GIN-debug] POST   /user/register            --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.registerHandler)-fm (5 handlers)
+[GIN-debug] PUT    /user/password            --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.updatePasswordHandler)-fm (6 handlers)
+[GIN-debug] POST   /blog                     --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.createBlog)-fm (6 handlers)
+[GIN-debug] GET    /blog                     --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogsByUser)-fm (6 handlers)
+[GIN-debug] GET    /blog/id/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogByID)-fm (5 handlers)
+[GIN-debug] GET    /blog/title/:title        --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogsByTitle)-fm (5 handlers)
+[GIN-debug] GET    /blog/userid/:userid      --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogByUserID)-fm (5 handlers)
+[GIN-debug] PUT    /blog/:id                 --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.updateBlog)-fm (6 handlers)
+[GIN-debug] DELETE /blog/id/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteBlogByID)-fm (6 handlers)
+[GIN-debug] DELETE /blog/userid/:userid      --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteBlogsByUserID)-fm (6 handlers)
+[GIN-debug] POST   /comment                  --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.createComment)-fm (6 handlers)
+[GIN-debug] GET    /comment/id/:id           --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findCommentByID)-fm (5 handlers)
+[GIN-debug] GET    /comment/userid/:userid   --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findCommentsByUserID)-fm (6 handlers)
+[GIN-debug] PUT    /comment/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.updateComment)-fm (6 handlers)
+[GIN-debug] DELETE /comment/id/:id           --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteCommentByID)-fm (6 handlers)
+[GIN-debug] DELETE /comment/userid/:userid   --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteCommentsByUserID)-fm (6 handlers)
+[GIN-debug] Listening and serving HTTP on 0.0.0.0:5000
+[GIN-debug] [ERROR] listen tcp 0.0.0.0:5000: bind: address already in use
+panic: listen tcp 0.0.0.0:5000: bind: address already in use
+
+goroutine 1 [running]:
+main.main()
+	/home/aaron/go/src/hypermedlab/myblog/cmd/user_server/user_server.go:34 +0x3cc
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /user/login               --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.loginHandler)-fm (5 handlers)
+[GIN-debug] POST   /user/register            --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.registerHandler)-fm (5 handlers)
+[GIN-debug] PUT    /user/password            --> hypermedlab/myblog/routes.(*user).(hypermedlab/myblog/routes.updatePasswordHandler)-fm (6 handlers)
+[GIN-debug] POST   /blog                     --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.createBlog)-fm (6 handlers)
+[GIN-debug] GET    /blog                     --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogsByUser)-fm (6 handlers)
+[GIN-debug] GET    /blog/id/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogByID)-fm (5 handlers)
+[GIN-debug] GET    /blog/title/:title        --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogsByTitle)-fm (5 handlers)
+[GIN-debug] GET    /blog/userid/:userid      --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findBlogByUserID)-fm (5 handlers)
+[GIN-debug] PUT    /blog/:id                 --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.updateBlog)-fm (6 handlers)
+[GIN-debug] DELETE /blog/id/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteBlogByID)-fm (6 handlers)
+[GIN-debug] DELETE /blog/userid/:userid      --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteBlogsByUserID)-fm (6 handlers)
+[GIN-debug] POST   /comment                  --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.createComment)-fm (6 handlers)
+[GIN-debug] GET    /comment/id/:id           --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findCommentByID)-fm (5 handlers)
+[GIN-debug] GET    /comment/userid/:userid   --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.findCommentsByUserID)-fm (6 handlers)
+[GIN-debug] PUT    /comment/:id              --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.updateComment)-fm (6 handlers)
+[GIN-debug] DELETE /comment/id/:id           --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteCommentByID)-fm (6 handlers)
+[GIN-debug] DELETE /comment/userid/:userid   --> hypermedlab/myblog/routes.(*blog).(hypermedlab/myblog/routes.deleteCommentsByUserID)-fm (6 handlers)
+[GIN-debug] Listening and serving HTTP on 0.0.0.0:5000
+[GIN] 2018/12/21 - 13:47:45 | 204 |       4.481µs |             ::1 | OPTIONS  /user/login
+[GIN] 2018/12/21 - 13:47:46 | 200 |  878.795441ms |             ::1 | POST     /user/login
+[GIN] 2018/12/21 - 13:47:46 | 204 |        8.41µs |             ::1 | OPTIONS  /blog/userid/000000
+[GIN] 2018/12/21 - 13:47:46 | 200 |     526.205µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:47:49 | 204 |        5.65µs |             ::1 | OPTIONS  /blog
+[GIN] 2018/12/21 - 13:47:49 | 200 |     549.226µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:47:53 | 204 |        5.18µs |             ::1 | OPTIONS  /blog/userid/000000
+[GIN] 2018/12/21 - 13:47:53 | 200 |     452.611µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:47:56 | 204 |        5.76µs |             ::1 | OPTIONS  /blog
+[GIN] 2018/12/21 - 13:47:56 | 200 |     579.237µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:47:56 | 200 |     859.781µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:48:00 | 204 |        5.07µs |             ::1 | OPTIONS  /blog/userid/000000
+[GIN] 2018/12/21 - 13:48:01 | 200 |     400.509µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:48:14 | 204 |        6.74µs |             ::1 | OPTIONS  /user/login
+2018/12/21 13:48:14 error account not exists
+[GIN] 2018/12/21 - 13:48:14 | 400 |     377.828µs |             ::1 | POST     /user/login
+[GIN] 2018/12/21 - 13:52:11 | 204 |       4.931µs |             ::1 | OPTIONS  /user/login
+2018/12/21 13:52:11 error account not exists
+[GIN] 2018/12/21 - 13:52:11 | 400 |     373.087µs |             ::1 | POST     /user/login
+[GIN] 2018/12/21 - 13:52:17 | 204 |       5.231µs |             ::1 | OPTIONS  /user/login
+[GIN] 2018/12/21 - 13:52:17 | 200 |   875.55262ms |             ::1 | POST     /user/login
+[GIN] 2018/12/21 - 13:52:17 | 204 |        14.1µs |             ::1 | OPTIONS  /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:17 | 200 |     374.146µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:20 | 204 |        5.04µs |             ::1 | OPTIONS  /blog
+[GIN] 2018/12/21 - 13:52:20 | 200 |     474.491µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:22 | 200 |     591.976µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:23 | 204 |        8.52µs |             ::1 | OPTIONS  /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:23 | 200 |     416.518µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:25 | 204 |         5.4µs |             ::1 | OPTIONS  /blog
+[GIN] 2018/12/21 - 13:52:25 | 200 |     606.577µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:25 | 200 |     866.659µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:27 | 200 |     541.114µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:30 | 200 |     569.095µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:30 | 204 |       15.08µs |             ::1 | OPTIONS  /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:30 | 200 |     366.657µs |             ::1 | GET      /blog/userid/000000
+[GIN] 2018/12/21 - 13:52:31 | 204 |        4.58µs |             ::1 | OPTIONS  /blog
+[GIN] 2018/12/21 - 13:52:31 | 200 |     571.365µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:33 | 200 |     618.998µs |             ::1 | GET      /blog
+[GIN] 2018/12/21 - 13:52:33 | 200 |     396.657µs |             ::1 | GET      /blog/userid/000000
