@@ -54,7 +54,7 @@ func (p *postgre) createNewTable() error {
 
 func (p *postgre) createAdmin() error {
 	u, _ := p.FindUserByID("000000")
-	if u == nil {
+	if u != nil {
 		return nil
 	}
 	hasehdpwd, err := password.HashPassword("123456")
