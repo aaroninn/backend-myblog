@@ -12,6 +12,7 @@ type Service interface {
 	FindBlogByID(string) (*blog.Blog, error)
 	FindBlogsByUserID(string) ([]*blog.Blog, error)
 	FindBlogsByTitle(string) ([]*blog.Blog, error)
+	FindBlogsByUserName(string) ([]*blog.Blog, error)
 	FindCommentByID(string) (*blog.Comment, error)
 	FindCommentsByUserID(string) ([]*blog.Comment, error)
 

@@ -29,6 +29,7 @@ func (b *blog) Init() {
 	blogroute.GET("/id/:id", middlewares.IPCount, b.findBlogByID)
 	blogroute.GET("/title/:title", middlewares.IPCount, b.findBlogsByTitle)
 	blogroute.GET("/userid/:userid", middlewares.IPCount, b.findBlogByUserID)
+	blogroute.GET("/username/:username", middlewares.IPCount, b.findBlogsByUserName)
 	blogroute.PUT("/:id", middlewares.IPCount, middlewares.AuthToken, b.updateBlog)
 	blogroute.DELETE("/id/:id", middlewares.IPCount, middlewares.AuthToken, b.deleteBlogByID)
 	blogroute.DELETE("/userid/:userid", middlewares.IPCount, middlewares.AuthToken, b.deleteBlogsByUserID)
@@ -153,6 +154,19 @@ func (b *blog) findBlogByUserID(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, blogs)
+}
+
+func (b *blog) findBlogsByUserName(ctx *gin.Context) {
+	username := ctx.Param("username")
+	blogs, err := b.srv.FindBlogsByUserName(username)
+	if err != nil {
+		log.Println(err)
+		ctx.String(400, err.Error())
+		return
+	}
+
+	ctx.JSON(200, blogs)
+
 }
 
 func (b *blog) findCommentByID(ctx *gin.Context) {

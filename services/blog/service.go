@@ -65,48 +65,27 @@ func (s *service) CreateComment(form *forms.CreateComment) (*mBlog.Blog, error) 
 }
 
 func (s *service) FindBlogByID(id string) (*mBlog.Blog, error) {
-	b, err := s.db.FindBlogByID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
+	return s.db.FindBlogByID(id)
 }
 
 func (s *service) FindBlogsByUserID(userid string) ([]*mBlog.Blog, error) {
-	blogs, err := s.db.FindBlogsByUserID(userid)
-	if err != nil {
-		return nil, err
-	}
-
-	return blogs, nil
+	return s.db.FindBlogsByUserID(userid)
 }
 
 func (s *service) FindBlogsByTitle(title string) ([]*mBlog.Blog, error) {
-	blogs, err := s.db.FindBlogsByTitle(title)
-	if err != nil {
-		return nil, err
-	}
+	return s.db.FindBlogsByTitle(title)
+}
 
-	return blogs, nil
+func (s *service) FindBlogsByUserName(username string) ([]*mBlog.Blog, error) {
+	return s.db.FindBlogsByUserName(username)
 }
 
 func (s *service) FindCommentByID(id string) (*mBlog.Comment, error) {
-	comment, err := s.db.FindCommentByID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return comment, nil
+	return s.db.FindCommentByID(id)
 }
 
 func (s *service) FindCommentsByUserID(id string) ([]*mBlog.Comment, error) {
-	comments, err := s.db.FindCommentsByUserID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return s.db.FindCommentsByUserID(id)
 }
 
 func (s *service) UpdateBlog(form *forms.UpdateBlog) (*mBlog.Blog, error) {
@@ -148,21 +127,17 @@ func (s *service) UpdateComment(form *forms.UpdateComment) (*mBlog.Blog, error) 
 }
 
 func (s *service) DeleteBlogByID(id string) error {
-	err := s.db.DeleteBlogByID(id)
-	return err
+	return s.db.DeleteBlogByID(id)
 }
 
 func (s *service) DeleteBlogByUserID(id string) error {
-	err := s.db.DeleteBlogByUserID(id)
-	return err
+	return s.db.DeleteBlogByUserID(id)
 }
 
 func (s *service) DeleteCommentByID(id string) error {
-	err := s.db.DeleteCommentByID(id)
-	return err
+	return s.db.DeleteCommentByID(id)
 }
 
 func (s *service) DeleteCommentByUserID(id string) error {
-	err := s.db.DeleteCommentByUserID(id)
-	return err
+	return s.db.DeleteCommentByUserID(id)
 }

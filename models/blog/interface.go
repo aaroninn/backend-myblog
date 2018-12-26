@@ -7,6 +7,7 @@ type DB interface {
 	FindBlogsByTitle(string) ([]*Blog, error)
 	FindBlogByID(string) (*Blog, error)
 	FindBlogsByUserID(string) ([]*Blog, error)
+	FindBlogsByUserName(string) ([]*Blog, error)
 	FindCommentsByBlogID(string) ([]*Comment, error)
 	FindCommentByID(string) (*Comment, error)
 	FindCommentsByUserID(string) ([]*Comment, error)

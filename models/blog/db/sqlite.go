@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type postgre struct {
+type sqlite struct {
 	db *sqlx.DB
 }
 
@@ -94,8 +94,30 @@ ON blog.id = comment.blogid
 WHERE blog.title LIKE $1
 `
 
+const findBlogsByUserName = `
+SELECT 
+blog.id AS id,
+blog.title AS title,
+blog.content AS content,
+blog.userid AS userid,
+blog.username AS username,
+blog.create_at AS create_at,
+blog.update_at AS update_at,
+comment.id AS commentid,
+comment.content AS commentcontent,
+comment.userid AS commentuserid,
+comment.username AS commentusername,
+comment.blogid AS commentblogid,
+comment.create_at AS commentcreate_at,
+comment.update_at As commentupdate_at
+FROM comment LEFT JOIN blog
+ON blog.id = comment.blogid
+WHERE blog.username = $1
+ORDER BY create_at DESC
+`
+
 func NewBlogPostgre(conn *sqlx.DB) blog.DB {
-	p := &postgre{
+	p := &sqlite{
 		db: conn,
 	}
 
@@ -106,13 +128,13 @@ func NewBlogPostgre(conn *sqlx.DB) blog.DB {
 	return p
 }
 
-func (p *postgre) createNewTable() error {
-	_, err := p.db.Exec(createBlogTable)
+func (s *sqlite) createNewTable() error {
+	_, err := s.db.Exec(createBlogTable)
 	return err
 }
 
-func (p *postgre) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
-	_, err := p.db.Exec("INSERT INTO blog (id, title, content, userid, username) VALUES ($1, $2, $3, $4, $5)", b.ID, b.Title, b.Content, b.UserID, b.UserName)
+func (s *sqlite) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
+	_, err := s.db.Exec("INSERT INTO blog (id, title, content, userid, username) VALUES ($1, $2, $3, $4, $5)", b.ID, b.Title, b.Content, b.UserID, b.UserName)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +146,7 @@ func (p *postgre) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
 		UserName: "default",
 		Content:  "default",
 	}
-	_, err = p.CreateComment(comment)
+	_, err = s.CreateComment(comment)
 	if err != nil {
 		return nil, err
 	}
@@ -132,8 +154,8 @@ func (p *postgre) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
 	return b, nil
 }
 
-func (p *postgre) CreateComment(c *blog.Comment) (*blog.Comment, error) {
-	_, err := p.db.Exec("INSERT INTO comment (id, content, userid, username, blogid) VALUES ($1, $2, $3, $4, $5)", c.ID, c.Content, c.UserID, c.UserName, c.BlogID)
+func (s *sqlite) CreateComment(c *blog.Comment) (*blog.Comment, error) {
+	_, err := s.db.Exec("INSERT INTO comment (id, content, userid, username, blogid) VALUES ($1, $2, $3, $4, $5)", c.ID, c.Content, c.UserID, c.UserName, c.BlogID)
 	if err != nil {
 		return nil, err
 	}
@@ -158,9 +180,9 @@ type tmpBlog struct {
 	CommentUpdateAt time.Time `db:"commentupdate_at"`
 }
 
-func (p *postgre) FindBlogByID(id string) (*blog.Blog, error) {
+func (s *sqlite) FindBlogByID(id string) (*blog.Blog, error) {
 	tmpblgs := make([]*tmpBlog, 0)
-	err := p.db.Select(&tmpblgs, findBlogByID, id)
+	err := s.db.Select(&tmpblgs, findBlogByID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -193,9 +215,9 @@ func (p *postgre) FindBlogByID(id string) (*blog.Blog, error) {
 	return blg, nil
 }
 
-func (p *postgre) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
+func (s *sqlite) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
-	err := p.db.Select(&tmpblogs, findBlogsByTitle, "%"+title+"%")
+	err := s.db.Select(&tmpblogs, findBlogsByTitle, "%"+title+"%")
 	if err != nil {
 		return nil, err
 	}
@@ -237,9 +259,9 @@ func (p *postgre) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
 	return blgs, nil
 }
 
-func (p *postgre) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
+func (s *sqlite) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
-	err := p.db.Select(&tmpblogs, findBlogByUserID, userid)
+	err := s.db.Select(&tmpblogs, findBlogByUserID, userid)
 	if err != nil {
 		return nil, err
 	}
@@ -281,9 +303,53 @@ func (p *postgre) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 	return blgs, nil
 }
 
-func (p *postgre) FindCommentsByBlogID(blogid string) ([]*blog.Comment, error) {
+func (s *sqlite) FindBlogsByUserName(username string) ([]*blog.Blog, error) {
+	tmpblogs := make([]*tmpBlog, 0)
+	err := s.db.Select(&tmpblogs, findBlogsByUserName, username)
+	if err != nil {
+		return nil, err
+	}
+
+	blogs := make(map[string]*blog.Blog, 0)
+	comments := make(map[string][]*blog.Comment, 0)
+	for _, tmpblog := range tmpblogs {
+		blogs[tmpblog.ID] = &blog.Blog{
+			UserID:   tmpblog.UserID,
+			UserName: tmpblog.UserName,
+			Title:    tmpblog.Title,
+			Content:  tmpblog.Content,
+			ID:       tmpblog.ID,
+			CreateAt: tmpblog.CreateAt,
+			UpdateAt: tmpblog.UpdateAt,
+		}
+		cs := comments[tmpblog.ID]
+		c := &blog.Comment{
+			ID:       tmpblog.CommentID,
+			Content:  tmpblog.CommentContent,
+			UserID:   tmpblog.CommentUserID,
+			UserName: tmpblog.CommentUserName,
+			BlogID:   tmpblog.ID,
+			CreateAt: tmpblog.CommentCreateAt,
+			UpdateAt: tmpblog.CreateAt,
+		}
+		cs = append(cs, c)
+		comments[tmpblog.ID] = cs
+	}
+
+	blgs := make([]*blog.Blog, 0)
+	for _, blg := range blogs {
+		if len(comments[blg.ID]) > 1 {
+			blg.Comment = comments[blg.ID][1:]
+		}
+		blgs = append(blgs, blg)
+	}
+
+	return blgs, nil
+}
+
+func (s *sqlite) FindCommentsByBlogID(blogid string) ([]*blog.Comment, error) {
 	comments := make([]*blog.Comment, 0)
-	err := p.db.Select(&comments, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE blogid=$1", blogid)
+	err := s.db.Select(&comments, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE blogid=$1", blogid)
 	if err != nil {
 		return nil, err
 	}
@@ -291,9 +357,9 @@ func (p *postgre) FindCommentsByBlogID(blogid string) ([]*blog.Comment, error) {
 	return comments, nil
 }
 
-func (p *postgre) FindCommentsByUserID(userid string) ([]*blog.Comment, error) {
+func (s *sqlite) FindCommentsByUserID(userid string) ([]*blog.Comment, error) {
 	comments := make([]*blog.Comment, 0)
-	err := p.db.Select(&comments, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE userid=$1", userid)
+	err := s.db.Select(&comments, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE userid=$1", userid)
 	if err != nil {
 		return nil, err
 	}
@@ -301,9 +367,9 @@ func (p *postgre) FindCommentsByUserID(userid string) ([]*blog.Comment, error) {
 	return comments, nil
 }
 
-func (p *postgre) FindCommentByID(id string) (*blog.Comment, error) {
+func (s *sqlite) FindCommentByID(id string) (*blog.Comment, error) {
 	var c *blog.Comment
-	err := p.db.Get(c, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE id=$1", id)
+	err := s.db.Get(c, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE id=$1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -311,8 +377,8 @@ func (p *postgre) FindCommentByID(id string) (*blog.Comment, error) {
 	return c, nil
 }
 
-func (p *postgre) UpdateBlog(b *blog.Blog) (*blog.Blog, error) {
-	_, err := p.db.Exec("UPDATE blog SET content=$1, title=$2, update_at=$3 WHERE id=$4", b.Content, b.Title, time.Now(), b.ID)
+func (s *sqlite) UpdateBlog(b *blog.Blog) (*blog.Blog, error) {
+	_, err := s.db.Exec("UPDATE blog SET content=$1, title=$2, update_at=$3 WHERE id=$4", b.Content, b.Title, time.Now(), b.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -320,8 +386,8 @@ func (p *postgre) UpdateBlog(b *blog.Blog) (*blog.Blog, error) {
 	return b, nil
 }
 
-func (p *postgre) UpdateComment(c *blog.Comment) (*blog.Comment, error) {
-	_, err := p.db.Exec("UPDATE comment SET content=$1, update_at=$2 WHERE id=$3", c.Content, time.Now(), c.ID)
+func (s *sqlite) UpdateComment(c *blog.Comment) (*blog.Comment, error) {
+	_, err := s.db.Exec("UPDATE comment SET content=$1, update_at=$2 WHERE id=$3", c.Content, time.Now(), c.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -329,8 +395,8 @@ func (p *postgre) UpdateComment(c *blog.Comment) (*blog.Comment, error) {
 	return c, nil
 }
 
-func (p *postgre) DeleteBlogByID(id string) error {
-	tx, err := p.db.Begin()
+func (s *sqlite) DeleteBlogByID(id string) error {
+	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
@@ -350,13 +416,13 @@ func (p *postgre) DeleteBlogByID(id string) error {
 	return nil
 }
 
-func (p *postgre) DeleteCommentByID(id string) error {
-	_, err := p.db.Exec("DELETE FROM comment WHERE id=$1", id)
+func (s *sqlite) DeleteCommentByID(id string) error {
+	_, err := s.db.Exec("DELETE FROM comment WHERE id=$1", id)
 	return err
 }
 
-func (p *postgre) DeleteBlogByUserID(id string) error {
-	tx, err := p.db.Begin()
+func (s *sqlite) DeleteBlogByUserID(id string) error {
+	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
@@ -376,7 +442,7 @@ func (p *postgre) DeleteBlogByUserID(id string) error {
 	return nil
 }
 
-func (p *postgre) DeleteCommentByUserID(id string) error {
-	_, err := p.db.Exec("DELETE FROM comment WHERE userid=$1", id)
+func (s *sqlite) DeleteCommentByUserID(id string) error {
+	_, err := s.db.Exec("DELETE FROM comment WHERE userid=$1", id)
 	return err
 }
