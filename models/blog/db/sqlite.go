@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/jmoiron/sqlx"
 	"hypermedlab/myblog/models/blog"
+	"hypermedlab/myblog/pkgs/sort"
 	"hypermedlab/myblog/pkgs/uuid"
 	"time"
 )
@@ -256,6 +257,8 @@ func (s *sqlite) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
 		blgs = append(blgs, blg)
 	}
 
+	sort.Sort(blgs)
+
 	return blgs, nil
 }
 
@@ -300,6 +303,8 @@ func (s *sqlite) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 		blgs = append(blgs, blg)
 	}
 
+	sort.Sort(blgs)
+
 	return blgs, nil
 }
 
@@ -343,6 +348,8 @@ func (s *sqlite) FindBlogsByUserName(username string) ([]*blog.Blog, error) {
 		}
 		blgs = append(blgs, blg)
 	}
+
+	sort.Sort(blgs)
 
 	return blgs, nil
 }
@@ -445,4 +452,8 @@ func (s *sqlite) DeleteBlogByUserID(id string) error {
 func (s *sqlite) DeleteCommentByUserID(id string) error {
 	_, err := s.db.Exec("DELETE FROM comment WHERE userid=$1", id)
 	return err
+}
+
+func sortBlogByTimeDESC(blogs []*blog.Blog) {
+
 }
