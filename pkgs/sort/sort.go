@@ -3,7 +3,6 @@ package sort
 import (
 	"hypermedlab/myblog/models/blog"
 	"sort"
-	"time"
 )
 
 type blogs []*blog.Blog
@@ -13,16 +12,7 @@ func (bs blogs) Len() int {
 }
 
 func (bs blogs) Less(i, j int) bool {
-	t1, err := time.Parse("2006-01-02 15:04:05", bs[i].CreateAt.String())
-	if err != nil {
-		return false
-	}
-	t2, err := time.Parse("2006-01-02 15:04:05", bs[j].CreateAt.String())
-	if err != nil {
-		return false
-	}
-
-	return t1.Before(t2)
+	return bs[i].CreateAt.After(bs[j].CreateAt)
 }
 
 func (bs blogs) Swap(i, j int) {

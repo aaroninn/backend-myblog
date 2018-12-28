@@ -203,10 +203,10 @@ func (s *sqlite) FindBlogByID(id string) (*blog.Blog, error) {
 		comment := &blog.Comment{
 			ID:       tmpblg.CommentID,
 			Content:  tmpblg.CommentContent,
-			UserID:   tmpblg.UserID,
-			UserName: tmpblg.UserName,
-			CreateAt: tmpblg.CreateAt,
-			UpdateAt: tmpblg.UpdateAt,
+			UserID:   tmpblg.CommentUserID,
+			UserName: tmpblg.CommentUserName,
+			CreateAt: tmpblg.CommentCreateAt,
+			UpdateAt: tmpblg.CommentUpdateAt,
 		}
 		comments = append(comments, comment)
 	}
