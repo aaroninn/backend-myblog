@@ -12,7 +12,7 @@ type DB interface {
 
 	UpdateUserPassword(*User) error
 	UpdateUser(*User) error //update description and name
-	BanUser(string) error
+	UpdateUserStatus(string, bool) error
 
 	DeleteUserByID(string) error
 }

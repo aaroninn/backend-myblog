@@ -23,3 +23,8 @@ type UpdatePassword struct {
 	PrePassword string `json:"prePassword"`
 	Password    string `json:"password"`
 }
+
+type UpdateUserStatus struct {
+	UserID string
+	Status bool
+}

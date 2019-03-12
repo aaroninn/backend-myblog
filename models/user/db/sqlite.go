@@ -128,12 +128,22 @@ func (p *postgre) UpdateUser(u *user.User) error {
 	return err
 }
 
-func (p *postgre) BanUser(id string) error {
-	_, err := p.db.Exec("UPDATE bloguser SET baned=true WHERE id=$1", id)
+func (p *postgre) UpdateUserStatus(id string, status bool) error {
+	_, err := p.db.Exec("UPDATE bloguser SET baned=$1 WHERE id=$2", status, id)
 	return err
 }
 
 func (p *postgre) DeleteUserByID(id string) error {
 	_, err := p.db.Exec("DELETE * FROM bloguser WHERE id=$1", id)
 	return err
+}
+
+func (p *postgre) FindAllUsers() ([]*user.User, error) {
+	users := make([]*user.User, 0)
+	err := p.db.Select(&users, "SELECT * FROM bloguser")
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
