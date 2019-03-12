@@ -47,3 +47,21 @@ func AuthToken(ctx *gin.Context) {
 
 	ctx.Set("user", claims)
 }
+
+func AdminAuthToken(ctx *gin.Context) {
+	token := ctx.Request.Header.Get("Authorization")
+	claims, err := jwt.ValidateToken(token, Secret)
+	if err != nil || claims == nil {
+		ctx.JSON(401, err.Error())
+		ctx.Abort()
+		return
+	}
+
+	if claims.ID != "000000" {
+		ctx.JSON(401, err.Error())
+		ctx.Abort()
+		return
+	}
+
+	ctx.Set("user", claims)
+}

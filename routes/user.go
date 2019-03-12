@@ -31,6 +31,10 @@ func (u *user) Init() {
 	userroute.POST("/login", middlewares.IPCount, u.loginHandler)
 	userroute.POST("/register", middlewares.IPCount, u.registerHandler)
 	userroute.PUT("/password", middlewares.IPCount, middlewares.AuthToken, u.updatePasswordHandler)
+
+	adminroute := u.engine.Group("/admin")
+	adminroute.GET("/users", middlewares.IPCount, middlewares.AdminAuthToken, u.findAllUsersHandler)
+	adminroute.PUT("/user/:id/status/:status", middlewares.IPCount, middlewares.AdminAuthToken, u.changUserStatusHandler)
 }
 
 func (u *user) registerHandler(ctx *gin.Context) {
@@ -97,4 +101,19 @@ func (u *user) updatePasswordHandler(ctx *gin.Context) {
 	}
 
 	ctx.String(200, "update password success")
+}
+
+func (u *user) findAllUsersHandler(ctx *gin.Context) {
+	users, err := u.srv.FindAllUsers()
+	if err != nil {
+		log.Println(err)
+		ctx.String(500, err.Error())
+		return
+	}
+
+	ctx.JSON(200, users)
+}
+
+func (u *user) changeUserStatusHandler(ctx *gin.Context) {
+	id :=
 }

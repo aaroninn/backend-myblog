@@ -90,3 +90,11 @@ func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
 
 	return nil
 }
+
+func (u *user) FindAllUsers() ([]*mUser.User, error) {
+	return u.FindAllUsers()
+}
+
+func (u *user) UpdateUserStatus(userid string, status bool) error {
+	return u.UpdateUserStatus(userid, status)
+}
