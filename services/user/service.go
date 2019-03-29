@@ -3,12 +3,12 @@ package user
 import (
 	"errors"
 	"github.com/jmoiron/sqlx"
-	mUser "hypermedlab/myblog/models/user"
-	userDB "hypermedlab/myblog/models/user/db"
-	"hypermedlab/myblog/pkgs/forms"
-	"hypermedlab/myblog/pkgs/jwt"
-	"hypermedlab/myblog/pkgs/password"
-	"hypermedlab/myblog/pkgs/uuid"
+	mUser "hypermedlab/backend-myblog/models/user"
+	userDB "hypermedlab/backend-myblog/models/user/db"
+	"hypermedlab/backend-myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/pkgs/jwt"
+	"hypermedlab/backend-myblog/pkgs/password"
+	"hypermedlab/backend-myblog/pkgs/uuid"
 	"log"
 )
 

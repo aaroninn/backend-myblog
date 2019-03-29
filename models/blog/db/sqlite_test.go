@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"hypermedlab/myblog/models/blog"
+	"hypermedlab/backend-myblog/models/blog"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"

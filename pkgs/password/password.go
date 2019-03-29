@@ -2,7 +2,7 @@ package password
 
 import "golang.org/x/crypto/bcrypt"
 
-func HashePassword(pwd string) (string, error) {
+func HashedPassword(pwd string) (string, error) {
 	hashedpwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 14)
 	if err != nil {
 		return "", err

@@ -1,11 +1,12 @@
 package db
 
 import (
-	"github.com/jmoiron/sqlx"
-	"hypermedlab/myblog/models/user"
-	"hypermedlab/myblog/pkgs/forms"
-	"hypermedlab/operating-system/pkgs/password"
+	"hypermedlab/backend-myblog/models/user"
+	"hypermedlab/backend-myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/pkgs/password"
 	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const createTableUser = `
@@ -57,7 +58,7 @@ func (p *postgre) createAdmin() error {
 	if u != nil {
 		return nil
 	}
-	hasehdpwd, err := password.HashPassword("123456")
+	hasehdpwd, err := password.HashedPassword("123456")
 	if err != nil {
 		return err
 	}

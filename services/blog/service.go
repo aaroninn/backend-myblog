@@ -2,10 +2,10 @@ package blog
 
 import (
 	"github.com/jmoiron/sqlx"
-	mBlog "hypermedlab/myblog/models/blog"
-	blogDB "hypermedlab/myblog/models/blog/db"
-	"hypermedlab/myblog/pkgs/forms"
-	"hypermedlab/myblog/pkgs/uuid"
+	mBlog "hypermedlab/backend-myblog/models/blog"
+	blogDB "hypermedlab/backend-myblog/models/blog/db"
+	"hypermedlab/backend-myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/pkgs/uuid"
 	"time"
 )
 

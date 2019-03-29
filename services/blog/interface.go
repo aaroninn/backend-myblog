@@ -1,8 +1,8 @@
 package blog
 
 import (
-	"hypermedlab/myblog/models/blog"
-	"hypermedlab/myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/models/blog"
+	"hypermedlab/backend-myblog/pkgs/forms"
 )
 
 type Service interface {

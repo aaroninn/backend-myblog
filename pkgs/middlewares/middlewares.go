@@ -1,10 +1,11 @@
 package middlewares
 
 import (
+	"hypermedlab/backend-myblog/pkgs/jwt"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
-	"hypermedlab/myblog/pkgs/jwt"
-	"log"
 )
 
 const Secret = "哈哈没想到吧"
