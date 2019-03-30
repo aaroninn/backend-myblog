@@ -1,6 +1,6 @@
 package user
 
-import "hypermedlab/myblog/pkgs/forms"
+import "hypermedlab/backend-myblog/pkgs/forms"
 
 //DB User DB interface
 type DB interface {

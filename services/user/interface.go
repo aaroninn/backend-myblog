@@ -1,8 +1,8 @@
 package user
 
 import (
-	mUser "hypermedlab/myblog/models/user"
-	"hypermedlab/myblog/pkgs/forms"
+	mUser "hypermedlab/backend-myblog/models/user"
+	"hypermedlab/backend-myblog/pkgs/forms"
 )
 
 //Service user

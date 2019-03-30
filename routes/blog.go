@@ -3,10 +3,10 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"hypermedlab/myblog/pkgs/forms"
-	"hypermedlab/myblog/pkgs/jwt"
-	"hypermedlab/myblog/pkgs/middlewares"
-	blogSrv "hypermedlab/myblog/services/blog"
+	"hypermedlab/backend-myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/pkgs/jwt"
+	"hypermedlab/backend-myblog/pkgs/middlewares"
+	blogSrv "hypermedlab/backend-myblog/services/blog"
 	"log"
 )
 

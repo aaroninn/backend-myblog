@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
-	"hypermedlab/myblog/pkgs/middlewares"
-	"hypermedlab/myblog/routes"
+	"hypermedlab/backend-myblog/pkgs/middlewares"
+	"hypermedlab/backend-myblog/routes"
 )
 
 const secret = middlewares.Secret

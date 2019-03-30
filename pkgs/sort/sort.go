@@ -1,7 +1,7 @@
 package sort
 
 import (
-	"hypermedlab/myblog/models/blog"
+	"hypermedlab/backend-myblog/models/blog"
 	"sort"
 )
 

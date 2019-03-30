@@ -2,9 +2,9 @@ package db
 
 import (
 	"github.com/jmoiron/sqlx"
-	"hypermedlab/myblog/models/blog"
-	"hypermedlab/myblog/pkgs/sort"
-	"hypermedlab/myblog/pkgs/uuid"
+	"hypermedlab/backend-myblog/models/blog"
+	"hypermedlab/backend-myblog/pkgs/sort"
+	"hypermedlab/backend-myblog/pkgs/uuid"
 	"time"
 )
 

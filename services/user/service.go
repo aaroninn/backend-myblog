@@ -3,12 +3,12 @@ package user
 import (
 	"errors"
 	"github.com/jmoiron/sqlx"
-	mUser "hypermedlab/myblog/models/user"
-	userDB "hypermedlab/myblog/models/user/db"
-	"hypermedlab/myblog/pkgs/forms"
-	"hypermedlab/myblog/pkgs/jwt"
-	"hypermedlab/myblog/pkgs/password"
-	"hypermedlab/myblog/pkgs/uuid"
+	mUser "hypermedlab/backend-myblog/models/user"
+	userDB "hypermedlab/backend-myblog/models/user/db"
+	"hypermedlab/backend-myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/pkgs/jwt"
+	"hypermedlab/backend-myblog/pkgs/password"
+	"hypermedlab/backend-myblog/pkgs/uuid"
 	"log"
 )
 
@@ -24,7 +24,7 @@ func NewService(conn *sqlx.DB) Service {
 }
 
 func (u *user) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
-	hashedpwd, err := password.HashePassword(form.Password)
+	hashedpwd, err := password.HashPassword(form.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
 		return errors.New("password not correct")
 	}
 
-	hashedPw, err := password.HashePassword(form.Password)
+	hashedPw, err := password.HashPassword(form.Password)
 	if err != nil {
 		return err
 	}

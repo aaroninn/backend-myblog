@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
-	"hypermedlab/myblog/pkgs/jwt"
+	"hypermedlab/backend-myblog/pkgs/jwt"
 	"log"
 )
 

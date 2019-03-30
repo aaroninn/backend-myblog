@@ -3,10 +3,10 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"hypermedlab/myblog/pkgs/forms"
-	"hypermedlab/myblog/pkgs/jwt"
-	"hypermedlab/myblog/pkgs/middlewares"
-	userSrv "hypermedlab/myblog/services/user"
+	"hypermedlab/backend-myblog/pkgs/forms"
+	"hypermedlab/backend-myblog/pkgs/jwt"
+	"hypermedlab/backend-myblog/pkgs/middlewares"
+	userSrv "hypermedlab/backend-myblog/services/user"
 	"log"
 )
 
@@ -34,7 +34,7 @@ func (u *user) Init() {
 
 	adminroute := u.engine.Group("/admin")
 	adminroute.GET("/users", middlewares.IPCount, middlewares.AdminAuthToken, u.findAllUsersHandler)
-	adminroute.PUT("/user/:id/status/:status", middlewares.IPCount, middlewares.AdminAuthToken, u.changUserStatusHandler)
+	// adminroute.PUT("/user/:id/status/:status", middlewares.IPCount, middlewares.AdminAuthToken, u.changUserStatusHandler)
 }
 
 func (u *user) registerHandler(ctx *gin.Context) {
@@ -114,6 +114,6 @@ func (u *user) findAllUsersHandler(ctx *gin.Context) {
 	ctx.JSON(200, users)
 }
 
-func (u *user) changeUserStatusHandler(ctx *gin.Context) {
-	id :=
-}
+// func (u *user) changeUserStatusHandler(ctx *gin.Context) {
+// 	id :=
+// }
