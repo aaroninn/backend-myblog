@@ -1,12 +1,13 @@
 package main
 
 import (
+	"hypermedlab/backend-myblog/pkgs/middlewares"
+	"hypermedlab/backend-myblog/routes"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
-	"hypermedlab/backend-myblog/pkgs/middlewares"
-	"hypermedlab/backend-myblog/routes"
 )
 
 const secret = middlewares.Secret
