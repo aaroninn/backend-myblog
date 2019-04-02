@@ -1,15 +1,19 @@
 package user
 
 import (
-	"errors"
-	"github.com/jmoiron/sqlx"
+	"hypermedlab/backend-myblog/pkgs/middlewares"
 	mUser "hypermedlab/backend-myblog/models/user"
 	userDB "hypermedlab/backend-myblog/models/user/db"
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/jwt"
 	"hypermedlab/backend-myblog/pkgs/password"
 	"hypermedlab/backend-myblog/pkgs/uuid"
+	
+
+	"errors"
 	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type user struct {
@@ -24,7 +28,7 @@ func NewService(conn *sqlx.DB) Service {
 }
 
 func (u *user) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
-	hashedpwd, err := password.HashePassword(form.Password)
+	hashedpwd, err := password.HashedPassword(form.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +61,8 @@ func (u *user) Login(form *forms.LoginForm, secret string) (*mUser.User, error) 
 	}
 
 	usr.Token = token
+	middlewares.
+
 	return usr, nil
 }
 
@@ -73,7 +79,7 @@ func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
 		return errors.New("password not correct")
 	}
 
-	hashedPw, err := password.HashePassword(form.Password)
+	hashedPw, err := password.HashedPassword(form.Password)
 	if err != nil {
 		return err
 	}
