@@ -1,7 +1,6 @@
-package sessions
+package session
 
 import (
-	"errors"
 	"log"
 	"sync"
 	"time"
@@ -10,6 +9,7 @@ import (
 //Session struct
 type Session struct {
 	sessionID  string
+	data       interface{}
 	expireTime time.Time
 	createAt   time.Time
 }
@@ -27,6 +27,11 @@ func NewSession(sessionid string) *Session {
 //SetExpireTime set the expire time of session
 func (s *Session) SetExpireTime(t int) {
 	s.expireTime = time.Now().Add(time.Duration(t) * time.Second)
+}
+
+//SetData add data in session
+func (s *Session) SetData(data interface{}) {
+	s.data = data
 }
 
 //SessionsStorageInMemory is the struct of sessions storage in memory
@@ -83,6 +88,26 @@ func (s *SessionsStorageInMemory) Delete(sessionid string) {
 		}
 	}()
 	delete(s.sessions, sessionid)
+}
+
+//Update update session's data
+func (s *SessionsStorageInMemory) Update(sessionid string, data interface{}) error {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+	_, ok := s.sessions[sessionid]
+	if !ok {
+		return errSessionNotExist
+	}
+
+	s.sessions[sessionid].data = data
+	return nil
+}
+
+//SessionAmount return the amount of sessions storage in memory
+func (s *SessionsStorageInMemory) SessionAmount() int {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+	return len(s.sessions)
 }
 
 func (s *SessionsStorageInMemory) deleteSessions(sessionids []string) {
@@ -142,7 +167,7 @@ func (s *SessionsStorageInMemory) RefeshSession(sessionid string) error {
 
 	_, ok := s.sessions[sessionid]
 	if !ok {
-		return errors.New("error, session not exist")
+		return errSessionNotExist
 	}
 	s.sessions[sessionid].expireTime = time.Now().Add(defaultAge * time.Second)
 	return nil

@@ -2,13 +2,18 @@ package middlewares
 
 import (
 	"hypermedlab/backend-myblog/pkgs/jwt"
-	"log"
+	"hypermedlab/backend-myblog/pkgs/session"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gomodule/redigo/redis"
 )
 
 const Secret = "哈哈没想到吧"
+
+var Sessions *session.SessionsStorageInMemory
+
+func init() {
+	Sessions = session.NewSessionsStorage()
+}
 
 //IPCount to
 func IPCount(ctx *gin.Context) {
