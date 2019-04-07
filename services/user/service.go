@@ -14,18 +14,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type user struct {
-	db mUser.DB
+type Service struct {
+	db *userDB.Sqlite3
 }
 
 //NewService user
-func NewService(conn *sqlx.DB) Service {
-	return &user{
-		userDB.NewPostgre(conn),
+func NewService(conn *sqlx.DB) *Service {
+	return &Service{
+		userDB.NewSqlite3(conn),
 	}
 }
 
-func (u *user) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
+func (s *Service) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
 	hashedpwd, err := password.HashedPassword(form.Password)
 	if err != nil {
 		return nil, err
@@ -39,11 +39,11 @@ func (u *user) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
 		Description:    form.Description,
 	}
 
-	return u.db.CreateUser(usr)
+	return s.db.CreateUser(usr)
 }
 
-func (u *user) Login(form *forms.LoginForm, secret string) (*mUser.User, error) {
-	usr, err := u.db.FindUserByAccount(form.Account)
+func (s *Service) Login(form *forms.LoginForm, secret string) (*mUser.User, error) {
+	usr, err := s.db.FindUserByAccount(form.Account)
 	if err != nil {
 		return nil, errEmptyAccount
 	}
@@ -63,8 +63,8 @@ func (u *user) Login(form *forms.LoginForm, secret string) (*mUser.User, error) 
 	return usr, nil
 }
 
-func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
-	user, err := u.db.FindUserByID(form.UserID)
+func (s *Service) UpdatePassword(form *forms.UpdatePassword) error {
+	user, err := s.db.FindUserByID(form.UserID)
 	if err != nil {
 		log.Println(form.UserID)
 		log.Println(err)
@@ -86,7 +86,7 @@ func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
 		HashedPassword: hashedPw,
 	}
 
-	err = u.db.UpdateUserPassword(usr)
+	err = s.db.UpdateUserPassword(usr)
 	if err != nil {
 		return errors.New("update pw failed")
 	}
@@ -94,10 +94,10 @@ func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
 	return nil
 }
 
-func (u *user) FindAllUsers() ([]*mUser.User, error) {
-	return u.FindAllUsers()
+func (s *Service) FindAllUsers() ([]*mUser.User, error) {
+	return s.FindAllUsers()
 }
 
-func (u *user) UpdateUserStatus(userid string, status bool) error {
-	return u.UpdateUserStatus(userid, status)
+func (s *Service) UpdateUserStatus(userid string, status bool) error {
+	return s.UpdateUserStatus(userid, status)
 }

@@ -28,33 +28,33 @@ CREATE TABLE IF NOT EXISTS friend (
 )
 `
 
-type postgre struct {
+type Sqlite3 struct {
 	db *sqlx.DB
 }
 
-//NewPostgre sql connection
-func NewPostgre(conn *sqlx.DB) user.DB {
-	p := &postgre{
+//NewSqlite3 sql connection
+func NewSqlite3(conn *sqlx.DB) *Sqlite3 {
+	s := &Sqlite3{
 		db: conn,
 	}
 
-	if p.createNewTable() != nil {
+	if s.createNewTable() != nil {
 		panic("create table usr failed")
 	}
 
-	if p.createAdmin() != nil {
+	if s.createAdmin() != nil {
 		panic("create admin failed")
 	}
 
-	return p
+	return s
 }
-func (p *postgre) createNewTable() error {
-	_, err := p.db.Exec(createTableUser)
+func (s *Sqlite3) createNewTable() error {
+	_, err := s.db.Exec(createTableUser)
 	return err
 }
 
-func (p *postgre) createAdmin() error {
-	u, _ := p.FindUserByID("000000")
+func (s *Sqlite3) createAdmin() error {
+	u, _ := s.FindUserByID("000000")
 	if u != nil {
 		return nil
 	}
@@ -62,13 +62,13 @@ func (p *postgre) createAdmin() error {
 	if err != nil {
 		return err
 	}
-	_, err = p.db.Exec("INSERT INTO bloguser (id, account, name, email, hashedpassword, root, description) VALUES ($1, $2, $3, $4, $5, $6, $7)", "000000", "rootadmin", "admin", "448338094@qq.com", hasehdpwd, true, "")
+	_, err = s.db.Exec("INSERT INTO bloguser (id, account, name, email, hashedpassword, root, description) VALUES ($1, $2, $3, $4, $5, $6, $7)", "000000", "rootadmin", "admin", "448338094@qq.com", hasehdpwd, true, "")
 
 	return err
 }
 
-func (p *postgre) CreateUser(u *user.User) (*user.User, error) {
-	_, err := p.db.Exec("INSERT INTO bloguser (id, account, name, email, description, hashedpassword) VALUES ($1, $2, $3, $4, $5, $6)", u.ID, u.Account, u.Name, u.Email, u.Description, u.HashedPassword)
+func (s *Sqlite3) CreateUser(u *user.User) (*user.User, error) {
+	_, err := s.db.Exec("INSERT INTO bloguser (id, account, name, email, description, hashedpassword) VALUES ($1, $2, $3, $4, $5, $6)", u.ID, u.Account, u.Name, u.Email, u.Description, u.HashedPassword)
 	if err != nil {
 		return nil, err
 	}
@@ -76,14 +76,14 @@ func (p *postgre) CreateUser(u *user.User) (*user.User, error) {
 	return u, nil
 }
 
-func (p *postgre) InsertFriend(form forms.InsertFriend) error {
-	_, err := p.db.Exec("INSERT INTO friend (id, friend_id) VALUES ($1, $2)", form.ID, form.FriendID)
+func (s *Sqlite3) InsertFriend(form forms.InsertFriend) error {
+	_, err := s.db.Exec("INSERT INTO friend (id, friend_id) VALUES ($1, $2)", form.ID, form.FriendID)
 	return err
 }
 
-func (p *postgre) FindUserByID(id string) (*user.User, error) {
+func (s *Sqlite3) FindUserByID(id string) (*user.User, error) {
 	users := make([]*user.User, 0)
-	err := p.db.Select(&users, "SELECT id, account, email, name, description, hashedpassword, baned, root, create_at, last_login FROM bloguser WHERE id IN (SELECT friend_id  FROM friend WHERE id=$1) OR id=$1", id)
+	err := s.db.Select(&users, "SELECT id, account, email, name, description, hashedpassword, baned, root, create_at, last_login FROM bloguser WHERE id IN (SELECT friend_id  FROM friend WHERE id=$1) OR id=$1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -107,9 +107,9 @@ func (p *postgre) FindUserByID(id string) (*user.User, error) {
 	return u, nil
 }
 
-func (p *postgre) FindUserByAccount(acocunt string) (*user.User, error) {
+func (s *Sqlite3) FindUserByAccount(acocunt string) (*user.User, error) {
 	var usr user.User
-	err := p.db.Get(&usr, "SELECT id, account, email, name, description, hashedpassword, baned, root, create_at, last_login FROM bloguser WHERE account=$1", acocunt)
+	err := s.db.Get(&usr, "SELECT id, account, email, name, description, hashedpassword, baned, root, create_at, last_login FROM bloguser WHERE account=$1", acocunt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -118,30 +118,30 @@ func (p *postgre) FindUserByAccount(acocunt string) (*user.User, error) {
 	return &usr, nil
 }
 
-func (p *postgre) UpdateUserPassword(u *user.User) error {
-	_, err := p.db.Exec("UPDATE bloguser SET hashedpassword=$1 WHERE id=$2", u.HashedPassword, u.ID)
+func (s *Sqlite3) UpdateUserPassword(u *user.User) error {
+	_, err := s.db.Exec("UPDATE bloguser SET hashedpassword=$1 WHERE id=$2", u.HashedPassword, u.ID)
 	return err
 }
 
 //update description and name
-func (p *postgre) UpdateUser(u *user.User) error {
-	_, err := p.db.Exec("UPDATE bloguser SET description=$1, name=$2 WHERE id=$3", u.Description, u.Name, u.ID)
+func (s *Sqlite3) UpdateUser(u *user.User) error {
+	_, err := s.db.Exec("UPDATE bloguser SET description=$1, name=$2 WHERE id=$3", u.Description, u.Name, u.ID)
 	return err
 }
 
-func (p *postgre) UpdateUserStatus(id string, status bool) error {
-	_, err := p.db.Exec("UPDATE bloguser SET baned=$1 WHERE id=$2", status, id)
+func (s *Sqlite3) UpdateUserStatus(id string, status bool) error {
+	_, err := s.db.Exec("UPDATE bloguser SET baned=$1 WHERE id=$2", status, id)
 	return err
 }
 
-func (p *postgre) DeleteUserByID(id string) error {
-	_, err := p.db.Exec("DELETE * FROM bloguser WHERE id=$1", id)
+func (s *Sqlite3) DeleteUserByID(id string) error {
+	_, err := s.db.Exec("DELETE * FROM bloguser WHERE id=$1", id)
 	return err
 }
 
-func (p *postgre) FindAllUsers() ([]*user.User, error) {
+func (s *Sqlite3) FindAllUsers() ([]*user.User, error) {
 	users := make([]*user.User, 0)
-	err := p.db.Select(&users, "SELECT * FROM bloguser")
+	err := s.db.Select(&users, "SELECT * FROM bloguser")
 	if err != nil {
 		return nil, err
 	}

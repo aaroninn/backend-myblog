@@ -1,25 +1,27 @@
 package blog
 
 import (
-	"github.com/jmoiron/sqlx"
 	mBlog "hypermedlab/backend-myblog/models/blog"
 	blogDB "hypermedlab/backend-myblog/models/blog/db"
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/uuid"
+
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
-type service struct {
-	db mBlog.DB
+type Service struct {
+	db *blogDB.Sqlite3
 }
 
-func NewBlogService(conn *sqlx.DB) Service {
-	return &service{
-		db: blogDB.NewBlogPostgre(conn),
+func NewBlogService(conn *sqlx.DB) *Service {
+	return &Service{
+		db: blogDB.NewSqlite3(conn),
 	}
 }
 
-func (s *service) CreateBlog(form *forms.CreateBlog) (*mBlog.Blog, error) {
+func (s *Service) CreateBlog(form *forms.CreateBlog) (*mBlog.Blog, error) {
 	b := &mBlog.Blog{
 		ID:       uuid.NewV1(),
 		Title:    form.Title,
@@ -38,7 +40,7 @@ func (s *service) CreateBlog(form *forms.CreateBlog) (*mBlog.Blog, error) {
 	return b, nil
 }
 
-func (s *service) CreateComment(form *forms.CreateComment) (*mBlog.Blog, error) {
+func (s *Service) CreateComment(form *forms.CreateComment) (*mBlog.Blog, error) {
 	b, err := s.FindBlogByID(form.BlogID)
 	if err != nil {
 		return nil, errBlogNotExist
@@ -64,31 +66,31 @@ func (s *service) CreateComment(form *forms.CreateComment) (*mBlog.Blog, error) 
 	return b, nil
 }
 
-func (s *service) FindBlogByID(id string) (*mBlog.Blog, error) {
+func (s *Service) FindBlogByID(id string) (*mBlog.Blog, error) {
 	return s.db.FindBlogByID(id)
 }
 
-func (s *service) FindBlogsByUserID(userid string) ([]*mBlog.Blog, error) {
+func (s *Service) FindBlogsByUserID(userid string) ([]*mBlog.Blog, error) {
 	return s.db.FindBlogsByUserID(userid)
 }
 
-func (s *service) FindBlogsByTitle(title string) ([]*mBlog.Blog, error) {
+func (s *Service) FindBlogsByTitle(title string) ([]*mBlog.Blog, error) {
 	return s.db.FindBlogsByTitle(title)
 }
 
-func (s *service) FindBlogsByUserName(username string) ([]*mBlog.Blog, error) {
+func (s *Service) FindBlogsByUserName(username string) ([]*mBlog.Blog, error) {
 	return s.db.FindBlogsByUserName(username)
 }
 
-func (s *service) FindCommentByID(id string) (*mBlog.Comment, error) {
+func (s *Service) FindCommentByID(id string) (*mBlog.Comment, error) {
 	return s.db.FindCommentByID(id)
 }
 
-func (s *service) FindCommentsByUserID(id string) ([]*mBlog.Comment, error) {
+func (s *Service) FindCommentsByUserID(id string) ([]*mBlog.Comment, error) {
 	return s.db.FindCommentsByUserID(id)
 }
 
-func (s *service) UpdateBlog(form *forms.UpdateBlog) (*mBlog.Blog, error) {
+func (s *Service) UpdateBlog(form *forms.UpdateBlog) (*mBlog.Blog, error) {
 	b, err := s.FindBlogByID(form.BlogID)
 	if err != nil {
 		return nil, errBlogNotExist
@@ -106,7 +108,7 @@ func (s *service) UpdateBlog(form *forms.UpdateBlog) (*mBlog.Blog, error) {
 	return b, nil
 }
 
-func (s *service) UpdateComment(form *forms.UpdateComment) (*mBlog.Blog, error) {
+func (s *Service) UpdateComment(form *forms.UpdateComment) (*mBlog.Blog, error) {
 	comment := &mBlog.Comment{
 		ID:       form.CommentID,
 		Content:  form.Content,
@@ -126,18 +128,18 @@ func (s *service) UpdateComment(form *forms.UpdateComment) (*mBlog.Blog, error) 
 	return b, nil
 }
 
-func (s *service) DeleteBlogByID(id string) error {
+func (s *Service) DeleteBlogByID(id string) error {
 	return s.db.DeleteBlogByID(id)
 }
 
-func (s *service) DeleteBlogByUserID(id string) error {
+func (s *Service) DeleteBlogByUserID(id string) error {
 	return s.db.DeleteBlogByUserID(id)
 }
 
-func (s *service) DeleteCommentByID(id string) error {
+func (s *Service) DeleteCommentByID(id string) error {
 	return s.db.DeleteCommentByID(id)
 }
 
-func (s *service) DeleteCommentByUserID(id string) error {
+func (s *Service) DeleteCommentByUserID(id string) error {
 	return s.db.DeleteCommentByUserID(id)
 }
