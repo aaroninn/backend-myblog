@@ -34,6 +34,11 @@ func (s *Session) SetData(data interface{}) {
 	s.data = data
 }
 
+//GetData return data storage in session
+func (s *Session) GetData() interface{} {
+	return s.data
+}
+
 //SessionsStorageInMemory is the struct of sessions storage in memory
 type SessionsStorageInMemory struct {
 	sessions map[string]*Session

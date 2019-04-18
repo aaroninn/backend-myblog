@@ -2,11 +2,22 @@ package middlewares
 
 import (
 	"hypermedlab/backend-myblog/pkgs/jwt"
+	"hypermedlab/backend-myblog/pkgs/session"
 
 	"github.com/gin-gonic/gin"
 )
 
 const Secret = "哈哈没想到吧"
+
+type MiddleWare struct {
+	sessions *session.SessionsStorageInMemory
+}
+
+func NewMiddleWare(sessions *session.SessionsStorageInMemory) *MiddleWare {
+	return &MiddleWare{
+		sessions: sessions,
+	}
+}
 
 //IPCount to
 func IPCount(ctx *gin.Context) {
@@ -35,7 +46,7 @@ func IPCount(ctx *gin.Context) {
 	// }
 }
 
-func AuthToken(ctx *gin.Context) {
+func (m *MiddleWare) AuthToken(ctx *gin.Context) {
 	token := ctx.Request.Header.Get("Authorization")
 	claims, err := jwt.ValidateToken(token, Secret)
 	if err != nil || claims == nil {
@@ -44,10 +55,23 @@ func AuthToken(ctx *gin.Context) {
 		return
 	}
 
+	sess, ok := m.sessions.Get(claims.ID)
+	if !ok {
+		ctx.String(401, "err token not in session")
+		ctx.Abort()
+		return
+	}
+
+	if sess.GetData().(string) != token {
+		ctx.String(401, "err token is expired")
+		ctx.Abort()
+		return
+	}
+
 	ctx.Set("user", claims)
 }
 
-func AdminAuthToken(ctx *gin.Context) {
+func (m *MiddleWare) AdminAuthToken(ctx *gin.Context) {
 	token := ctx.Request.Header.Get("Authorization")
 	claims, err := jwt.ValidateToken(token, Secret)
 	if err != nil || claims == nil {
@@ -58,6 +82,19 @@ func AdminAuthToken(ctx *gin.Context) {
 
 	if claims.ID != "000000" {
 		ctx.JSON(401, err.Error())
+		ctx.Abort()
+		return
+	}
+
+	sess, ok := m.sessions.Get(claims.ID)
+	if !ok {
+		ctx.String(401, "err token not in session")
+		ctx.Abort()
+		return
+	}
+
+	if sess.GetData().(string) != token {
+		ctx.String(401, "err token is expired")
 		ctx.Abort()
 		return
 	}

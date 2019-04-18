@@ -14,15 +14,17 @@ import (
 var secret string
 
 type User struct {
-	srv    *userSrv.Service
-	Engine *gin.Engine
+	srv        *userSrv.Service
+	Engine     *gin.Engine
+	middleware *middlewares.MiddleWare
 }
 
-func NewUserRouter(srv *userSrv.Service, engine *gin.Engine, se string) *User {
+func NewUserRouter(srv *userSrv.Service, engine *gin.Engine, se string, middleware *middlewares.MiddleWare) *User {
 	secret = se
 	return &User{
-		srv:    srv,
-		Engine: engine,
+		srv:        srv,
+		Engine:     engine,
+		middleware: middleware,
 	}
 
 }
@@ -31,10 +33,10 @@ func (u *User) Init() {
 	userroute := u.Engine.Group("/user")
 	userroute.POST("/login", middlewares.IPCount, u.loginHandler)
 	userroute.POST("/register", middlewares.IPCount, u.registerHandler)
-	userroute.PUT("/password", middlewares.IPCount, middlewares.AuthToken, u.updatePasswordHandler)
+	userroute.PUT("/password", middlewares.IPCount, u.middleware.AuthToken, u.updatePasswordHandler)
 
 	adminroute := u.Engine.Group("/admin")
-	adminroute.GET("/users", middlewares.IPCount, middlewares.AdminAuthToken, u.findAllUsersHandler)
+	adminroute.GET("/users", middlewares.IPCount, u.middleware.AdminAuthToken, u.findAllUsersHandler)
 	// adminroute.PUT("/user/:id/status/:status", middlewares.IPCount, middlewares.AdminAuthToken, u.changUserStatusHandler)
 }
 

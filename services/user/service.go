@@ -10,16 +10,15 @@ import (
 	"hypermedlab/backend-myblog/pkgs/uuid"
 
 	"errors"
-	"log"
 )
 
 type Service struct {
 	db       *userDB.Sqlite3
-	sessions *session.Session
+	sessions *session.SessionsStorageInMemory
 }
 
 //NewService user
-func NewService(sql *userDB.Sqlite3, sessions *session.Session) *Service {
+func NewService(sql *userDB.Sqlite3, sessions *session.SessionsStorageInMemory) *Service {
 	return &Service{
 		sql,
 		sessions,
@@ -60,6 +59,15 @@ func (s *Service) Login(form *forms.LoginForm, secret string) (*mUser.User, erro
 	}
 
 	usr.Token = token
+	sess, ok := s.sessions.Get(usr.ID)
+	if !ok {
+		newSess := session.NewSession(usr.ID)
+		newSess.SetData(usr.Token)
+		s.sessions.Add(newSess)
+	} else {
+		sess.SetData(usr.Token)
+		s.sessions.RefeshSession(usr.ID)
+	}
 
 	return usr, nil
 }
@@ -67,8 +75,6 @@ func (s *Service) Login(form *forms.LoginForm, secret string) (*mUser.User, erro
 func (s *Service) UpdatePassword(form *forms.UpdatePassword) error {
 	user, err := s.db.FindUserByID(form.UserID)
 	if err != nil {
-		log.Println(form.UserID)
-		log.Println(err)
 		return errors.New("user not exist")
 	}
 
@@ -92,6 +98,8 @@ func (s *Service) UpdatePassword(form *forms.UpdatePassword) error {
 		return errors.New("update pw failed")
 	}
 
+	s.sessions.Delete(usr.ID)
+
 	return nil
 }
 
@@ -101,4 +109,8 @@ func (s *Service) FindAllUsers() ([]*mUser.User, error) {
 
 func (s *Service) UpdateUserStatus(userid string, status bool) error {
 	return s.UpdateUserStatus(userid, status)
+}
+
+func (s *Service) GetSession(userid string) (*session.Session, bool) {
+	return s.sessions.Get(userid)
 }

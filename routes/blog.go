@@ -12,36 +12,38 @@ import (
 )
 
 type Blog struct {
-	srv    *blogSrv.Service
-	Engine *gin.Engine
+	srv        *blogSrv.Service
+	Engine     *gin.Engine
+	middleware *middlewares.MiddleWare
 }
 
-func NewBlogRouter(srv *blogSrv.Service, e *gin.Engine) *Blog {
+func NewBlogRouter(srv *blogSrv.Service, e *gin.Engine, middleware *middlewares.MiddleWare) *Blog {
 	return &Blog{
-		srv:    srv,
-		Engine: e,
+		srv:        srv,
+		Engine:     e,
+		middleware: middleware,
 	}
 }
 
 func (b *Blog) Init() {
 	blogroute := b.Engine.Group("/blog")
-	blogroute.POST("", middlewares.IPCount, middlewares.AuthToken, b.createBlog)
-	blogroute.GET("", middlewares.IPCount, middlewares.AuthToken, b.findBlogsByUser)
+	blogroute.POST("", middlewares.IPCount, b.middleware.AuthToken, b.createBlog)
+	blogroute.GET("", middlewares.IPCount, b.middleware.AuthToken, b.findBlogsByUser)
 	blogroute.GET("/id/:id", middlewares.IPCount, b.findBlogByID)
 	blogroute.GET("/title/:title", middlewares.IPCount, b.findBlogsByTitle)
 	blogroute.GET("/userid/:userid", middlewares.IPCount, b.findBlogByUserID)
 	blogroute.GET("/username/:username", middlewares.IPCount, b.findBlogsByUserName)
-	blogroute.PUT("/:id", middlewares.IPCount, middlewares.AuthToken, b.updateBlog)
-	blogroute.DELETE("/id/:id", middlewares.IPCount, middlewares.AuthToken, b.deleteBlogByID)
-	blogroute.DELETE("/userid/:userid", middlewares.IPCount, middlewares.AuthToken, b.deleteBlogsByUserID)
+	blogroute.PUT("/:id", middlewares.IPCount, b.middleware.AuthToken, b.updateBlog)
+	blogroute.DELETE("/id/:id", middlewares.IPCount, b.middleware.AuthToken, b.deleteBlogByID)
+	blogroute.DELETE("/userid/:userid", middlewares.IPCount, b.middleware.AuthToken, b.deleteBlogsByUserID)
 
 	commentroute := b.Engine.Group("/comment")
-	commentroute.POST("", middlewares.IPCount, middlewares.AuthToken, b.createComment)
+	commentroute.POST("", middlewares.IPCount, b.middleware.AuthToken, b.createComment)
 	commentroute.GET("/id/:id", middlewares.IPCount, b.findCommentByID)
-	commentroute.GET("/userid/:userid", middlewares.IPCount, middlewares.AuthToken, b.findCommentsByUserID)
-	commentroute.PUT("/:id", middlewares.IPCount, middlewares.AuthToken, b.updateComment)
-	commentroute.DELETE("/id/:id", middlewares.IPCount, middlewares.AuthToken, b.deleteCommentByID)
-	commentroute.DELETE("/userid/:userid", middlewares.IPCount, middlewares.AuthToken, b.deleteCommentsByUserID)
+	commentroute.GET("/userid/:userid", middlewares.IPCount, b.middleware.AuthToken, b.findCommentsByUserID)
+	commentroute.PUT("/:id", middlewares.IPCount, b.middleware.AuthToken, b.updateComment)
+	commentroute.DELETE("/id/:id", middlewares.IPCount, b.middleware.AuthToken, b.deleteCommentByID)
+	commentroute.DELETE("/userid/:userid", middlewares.IPCount, b.middleware.AuthToken, b.deleteCommentsByUserID)
 }
 
 func (b *Blog) createBlog(ctx *gin.Context) {
