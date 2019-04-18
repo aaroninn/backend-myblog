@@ -1,12 +1,13 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/jwt"
 	"hypermedlab/backend-myblog/pkgs/middlewares"
 	blogSrv "hypermedlab/backend-myblog/services/blog"
+
+	"github.com/gin-gonic/gin"
+
 	"log"
 )
 
@@ -15,9 +16,9 @@ type Blog struct {
 	Engine *gin.Engine
 }
 
-func NewBlogRouter(conn *sqlx.DB, e *gin.Engine) *Blog {
+func NewBlogRouter(srv *blogSrv.Service, e *gin.Engine) *Blog {
 	return &Blog{
-		srv:    blogSrv.NewBlogService(conn),
+		srv:    srv,
 		Engine: e,
 	}
 }

@@ -1,12 +1,13 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/jwt"
 	"hypermedlab/backend-myblog/pkgs/middlewares"
 	userSrv "hypermedlab/backend-myblog/services/user"
+
+	"github.com/gin-gonic/gin"
+
 	"log"
 )
 
@@ -17,10 +18,10 @@ type User struct {
 	Engine *gin.Engine
 }
 
-func NewUserRouter(conn *sqlx.DB, engine *gin.Engine, se string) *User {
+func NewUserRouter(srv *userSrv.Service, engine *gin.Engine, se string) *User {
 	secret = se
 	return &User{
-		srv:    userSrv.NewService(conn),
+		srv:    srv,
 		Engine: engine,
 	}
 

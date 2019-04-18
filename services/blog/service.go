@@ -7,17 +7,15 @@ import (
 	"hypermedlab/backend-myblog/pkgs/uuid"
 
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type Service struct {
 	db *blogDB.Sqlite3
 }
 
-func NewBlogService(conn *sqlx.DB) *Service {
+func NewBlogService(sql *blogDB.Sqlite3) *Service {
 	return &Service{
-		db: blogDB.NewSqlite3(conn),
+		db: sql,
 	}
 }
 

@@ -6,22 +6,23 @@ import (
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/jwt"
 	"hypermedlab/backend-myblog/pkgs/password"
+	"hypermedlab/backend-myblog/pkgs/session"
 	"hypermedlab/backend-myblog/pkgs/uuid"
 
 	"errors"
 	"log"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type Service struct {
-	db *userDB.Sqlite3
+	db       *userDB.Sqlite3
+	sessions *session.Session
 }
 
 //NewService user
-func NewService(conn *sqlx.DB) *Service {
+func NewService(sql *userDB.Sqlite3, sessions *session.Session) *Service {
 	return &Service{
-		userDB.NewSqlite3(conn),
+		sql,
+		sessions,
 	}
 }
 

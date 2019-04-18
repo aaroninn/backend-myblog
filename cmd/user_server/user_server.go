@@ -4,6 +4,7 @@ import (
 	blogDB "hypermedlab/backend-myblog/models/blog/db"
 	userDB "hypermedlab/backend-myblog/models/user/db"
 	"hypermedlab/backend-myblog/pkgs/middlewares"
+	"hypermedlab/backend-myblog/pkgs/session"
 	"hypermedlab/backend-myblog/routes"
 	"hypermedlab/backend-myblog/services/blog"
 	"hypermedlab/backend-myblog/services/user"
@@ -25,6 +26,7 @@ func buildContainer() *dig.Container {
 	container.Provide(userDB.NewSqlite3)
 	container.Provide(blog.NewBlogService)
 	container.Provide(user.NewService)
+	container.Provide(session.NewSession)
 	container.Provide(func() (*sqlx.DB, *gin.Engine, string) {
 		gin.SetMode(gin.ReleaseMode)
 		engine := gin.Default()
