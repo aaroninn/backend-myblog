@@ -27,7 +27,7 @@ func buildContainer() *dig.Container {
 	container.Provide(blog.NewBlogService)
 	container.Provide(user.NewService)
 	container.Provide(session.NewSession)
-	container.Provide((middlewares.NewMiddleWare))
+	container.Provide(middlewares.NewMiddleWare)
 	container.Provide(func() (*sqlx.DB, *gin.Engine, string) {
 		gin.SetMode(gin.ReleaseMode)
 		engine := gin.Default()

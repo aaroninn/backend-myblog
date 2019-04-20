@@ -144,6 +144,19 @@ func (s *SessionsStorageInMemory) checkSessionInStorage(t time.Duration) {
 	}
 }
 
+//SetAutoFresh auto fresh when Get
+func (s *SessionsStorageInMemory) SetAutoFresh() {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+	s.refresh = true
+}
+
+func (s *SessionsStorageInMemory) DisableAutoFresh() {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+	s.refresh = false
+}
+
 func (s *SessionsStorageInMemory) checkSessions() {
 	s.rw.RLock()
 	defer s.rw.RUnlock()

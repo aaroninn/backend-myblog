@@ -72,6 +72,10 @@ func (s *Service) Login(form *forms.LoginForm, secret string) (*mUser.User, erro
 	return usr, nil
 }
 
+func (s *Service) LogOut(id string) {
+	s.sessions.Delete(id)
+}
+
 func (s *Service) UpdatePassword(form *forms.UpdatePassword) error {
 	user, err := s.db.FindUserByID(form.UserID)
 	if err != nil {

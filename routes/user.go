@@ -33,6 +33,7 @@ func (u *User) Init() {
 	userroute := u.Engine.Group("/user")
 	userroute.POST("/login", middlewares.IPCount, u.loginHandler)
 	userroute.POST("/register", middlewares.IPCount, u.registerHandler)
+	userroute.PUT("/logout", middlewares.IPCount, u.middleware.AuthToken, u.logOutHandler)
 	userroute.PUT("/password", middlewares.IPCount, u.middleware.AuthToken, u.updatePasswordHandler)
 
 	adminroute := u.Engine.Group("/admin")
@@ -76,6 +77,18 @@ func (u *User) loginHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, usr)
+}
+
+func (u *User) logOutHandler(ctx *gin.Context) {
+	v, ok := ctx.Get("user")
+	if !ok {
+		log.Println("get user failed")
+		ctx.String(400, "token expired")
+		return
+	}
+
+	u.srv.LogOut(v.(*jwt.CustomClaims).ID)
+	ctx.String(200, "log out success")
 }
 
 func (u *User) updatePasswordHandler(ctx *gin.Context) {
