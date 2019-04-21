@@ -34,6 +34,11 @@ func (s *Session) SetData(data interface{}) {
 	s.data = data
 }
 
+//GetData return data storage in session
+func (s *Session) GetData() interface{} {
+	return s.data
+}
+
 //SessionsStorageInMemory is the struct of sessions storage in memory
 type SessionsStorageInMemory struct {
 	sessions map[string]*Session
@@ -47,6 +52,8 @@ const defaultAge = 24 * 60 * 60
 //NewSessionsStorage return a ptr of SessionsStorageInMemory struct
 func NewSessionsStorage() *SessionsStorageInMemory {
 	session := new(SessionsStorageInMemory)
+	session.sessions = make(map[string]*Session)
+	session.age = defaultAge
 	//check every hour to make sure expireout session is deleted
 	go session.checkSessionInStorage(60 * 60 * time.Second)
 	return session
@@ -65,7 +72,10 @@ func (s *SessionsStorageInMemory) Add(session *Session) {
 func (s *SessionsStorageInMemory) Get(sessionid string) (*Session, bool) {
 	s.rw.RLock()
 	defer s.rw.RUnlock()
-	session := s.sessions[sessionid]
+	session, ok := s.sessions[sessionid]
+	if !ok {
+		return nil, false
+	}
 	if time.Now().After(session.expireTime) {
 		go s.Delete(sessionid)
 		return nil, false
@@ -101,6 +111,10 @@ func (s *SessionsStorageInMemory) Update(sessionid string, data interface{}) err
 
 	s.sessions[sessionid].data = data
 	return nil
+}
+
+func (s *SessionsStorageInMemory) SetSessionAge(age int) {
+	s.age = age
 }
 
 //SessionAmount return the amount of sessions storage in memory
@@ -139,6 +153,19 @@ func (s *SessionsStorageInMemory) checkSessionInStorage(t time.Duration) {
 	}
 }
 
+//SetAutoFresh auto fresh when Get
+func (s *SessionsStorageInMemory) SetAutoFresh() {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+	s.refresh = true
+}
+
+func (s *SessionsStorageInMemory) DisableAutoFresh() {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+	s.refresh = false
+}
+
 func (s *SessionsStorageInMemory) checkSessions() {
 	s.rw.RLock()
 	defer s.rw.RUnlock()
@@ -169,6 +196,6 @@ func (s *SessionsStorageInMemory) RefeshSession(sessionid string) error {
 	if !ok {
 		return errSessionNotExist
 	}
-	s.sessions[sessionid].expireTime = time.Now().Add(defaultAge * time.Second)
+	s.sessions[sessionid].expireTime = time.Now().Add(time.Duration(s.age) * time.Second)
 	return nil
 }

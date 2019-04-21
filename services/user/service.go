@@ -6,26 +6,26 @@ import (
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/jwt"
 	"hypermedlab/backend-myblog/pkgs/password"
+	"hypermedlab/backend-myblog/pkgs/session"
 	"hypermedlab/backend-myblog/pkgs/uuid"
 
 	"errors"
-	"log"
-
-	"github.com/jmoiron/sqlx"
 )
 
-type user struct {
-	db mUser.DB
+type Service struct {
+	db       *userDB.Sqlite3
+	sessions *session.SessionsStorageInMemory
 }
 
 //NewService user
-func NewService(conn *sqlx.DB) Service {
-	return &user{
-		userDB.NewPostgre(conn),
+func NewService(sql *userDB.Sqlite3, sessions *session.SessionsStorageInMemory) *Service {
+	return &Service{
+		sql,
+		sessions,
 	}
 }
 
-func (u *user) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
+func (s *Service) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
 	hashedpwd, err := password.HashedPassword(form.Password)
 	if err != nil {
 		return nil, err
@@ -39,11 +39,11 @@ func (u *user) RegisterUser(form *forms.CreateUser) (*mUser.User, error) {
 		Description:    form.Description,
 	}
 
-	return u.db.CreateUser(usr)
+	return s.db.CreateUser(usr)
 }
 
-func (u *user) Login(form *forms.LoginForm, secret string) (*mUser.User, error) {
-	usr, err := u.db.FindUserByAccount(form.Account)
+func (s *Service) Login(form *forms.LoginForm, secret string) (*mUser.User, error) {
+	usr, err := s.db.FindUserByAccount(form.Account)
 	if err != nil {
 		return nil, errEmptyAccount
 	}
@@ -59,15 +59,26 @@ func (u *user) Login(form *forms.LoginForm, secret string) (*mUser.User, error) 
 	}
 
 	usr.Token = token
+	sess, ok := s.sessions.Get(usr.ID)
+	if !ok {
+		newSess := session.NewSession(usr.ID)
+		newSess.SetData(usr.Token)
+		s.sessions.Add(newSess)
+	} else {
+		sess.SetData(usr.Token)
+		s.sessions.RefeshSession(usr.ID)
+	}
 
 	return usr, nil
 }
 
-func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
-	user, err := u.db.FindUserByID(form.UserID)
+func (s *Service) LogOut(id string) {
+	s.sessions.Delete(id)
+}
+
+func (s *Service) UpdatePassword(form *forms.UpdatePassword) error {
+	user, err := s.db.FindUserByID(form.UserID)
 	if err != nil {
-		log.Println(form.UserID)
-		log.Println(err)
 		return errors.New("user not exist")
 	}
 
@@ -86,18 +97,24 @@ func (u *user) UpdatePassword(form *forms.UpdatePassword) error {
 		HashedPassword: hashedPw,
 	}
 
-	err = u.db.UpdateUserPassword(usr)
+	err = s.db.UpdateUserPassword(usr)
 	if err != nil {
 		return errors.New("update pw failed")
 	}
 
+	s.sessions.Delete(usr.ID)
+
 	return nil
 }
 
-func (u *user) FindAllUsers() ([]*mUser.User, error) {
-	return u.FindAllUsers()
+func (s *Service) FindAllUsers() ([]*mUser.User, error) {
+	return s.FindAllUsers()
 }
 
-func (u *user) UpdateUserStatus(userid string, status bool) error {
-	return u.UpdateUserStatus(userid, status)
+func (s *Service) UpdateUserStatus(userid string, status bool) error {
+	return s.UpdateUserStatus(userid, status)
+}
+
+func (s *Service) GetSession(userid string) (*session.Session, bool) {
+	return s.sessions.Get(userid)
 }

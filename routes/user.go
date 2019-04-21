@@ -1,43 +1,47 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
 	"hypermedlab/backend-myblog/pkgs/forms"
 	"hypermedlab/backend-myblog/pkgs/jwt"
 	"hypermedlab/backend-myblog/pkgs/middlewares"
 	userSrv "hypermedlab/backend-myblog/services/user"
+
+	"github.com/gin-gonic/gin"
+
 	"log"
 )
 
 var secret string
 
-type user struct {
-	srv    userSrv.Service
-	engine *gin.Engine
+type User struct {
+	srv        *userSrv.Service
+	Engine     *gin.Engine
+	middleware *middlewares.MiddleWare
 }
 
-func NewUserRouter(conn *sqlx.DB, engine *gin.Engine, se string) Router {
+func NewUserRouter(srv *userSrv.Service, engine *gin.Engine, se string, middleware *middlewares.MiddleWare) *User {
 	secret = se
-	return &user{
-		srv:    userSrv.NewService(conn),
-		engine: engine,
+	return &User{
+		srv:        srv,
+		Engine:     engine,
+		middleware: middleware,
 	}
 
 }
 
-func (u *user) Init() {
-	userroute := u.engine.Group("/user")
+func (u *User) Init() {
+	userroute := u.Engine.Group("/user")
 	userroute.POST("/login", middlewares.IPCount, u.loginHandler)
 	userroute.POST("/register", middlewares.IPCount, u.registerHandler)
-	userroute.PUT("/password", middlewares.IPCount, middlewares.AuthToken, u.updatePasswordHandler)
+	userroute.PUT("/logout", middlewares.IPCount, u.middleware.AuthToken, u.logOutHandler)
+	userroute.PUT("/password", middlewares.IPCount, u.middleware.AuthToken, u.updatePasswordHandler)
 
-	adminroute := u.engine.Group("/admin")
-	adminroute.GET("/users", middlewares.IPCount, middlewares.AdminAuthToken, u.findAllUsersHandler)
+	adminroute := u.Engine.Group("/admin")
+	adminroute.GET("/users", middlewares.IPCount, u.middleware.AdminAuthToken, u.findAllUsersHandler)
 	// adminroute.PUT("/user/:id/status/:status", middlewares.IPCount, middlewares.AdminAuthToken, u.changUserStatusHandler)
 }
 
-func (u *user) registerHandler(ctx *gin.Context) {
+func (u *User) registerHandler(ctx *gin.Context) {
 	var form forms.CreateUser
 	err := ctx.Bind(&form)
 	if err != nil {
@@ -56,7 +60,7 @@ func (u *user) registerHandler(ctx *gin.Context) {
 	ctx.JSON(200, usr)
 }
 
-func (u *user) loginHandler(ctx *gin.Context) {
+func (u *User) loginHandler(ctx *gin.Context) {
 	var form forms.LoginForm
 	err := ctx.Bind(&form)
 	if err != nil {
@@ -75,7 +79,19 @@ func (u *user) loginHandler(ctx *gin.Context) {
 	ctx.JSON(200, usr)
 }
 
-func (u *user) updatePasswordHandler(ctx *gin.Context) {
+func (u *User) logOutHandler(ctx *gin.Context) {
+	v, ok := ctx.Get("user")
+	if !ok {
+		log.Println("get user failed")
+		ctx.String(400, "token expired")
+		return
+	}
+
+	u.srv.LogOut(v.(*jwt.CustomClaims).ID)
+	ctx.String(200, "log out success")
+}
+
+func (u *User) updatePasswordHandler(ctx *gin.Context) {
 	var form forms.UpdatePassword
 	err := ctx.Bind(&form)
 	if err != nil {
@@ -103,7 +119,7 @@ func (u *user) updatePasswordHandler(ctx *gin.Context) {
 	ctx.String(200, "update password success")
 }
 
-func (u *user) findAllUsersHandler(ctx *gin.Context) {
+func (u *User) findAllUsersHandler(ctx *gin.Context) {
 	users, err := u.srv.FindAllUsers()
 	if err != nil {
 		log.Println(err)
@@ -114,6 +130,6 @@ func (u *user) findAllUsersHandler(ctx *gin.Context) {
 	ctx.JSON(200, users)
 }
 
-// func (u *user) changeUserStatusHandler(ctx *gin.Context) {
+// func (u *User) changeUserStatusHandler(ctx *gin.Context) {
 // 	id :=
 // }

@@ -1,23 +1,26 @@
-package db
+package blog
 
 import (
-	"github.com/jmoiron/sqlx"
 	"hypermedlab/backend-myblog/models/blog"
 	"hypermedlab/backend-myblog/pkgs/sort"
 	"hypermedlab/backend-myblog/pkgs/uuid"
+
+	"errors"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
-type sqlite struct {
+type Sqlite3 struct {
 	db *sqlx.DB
 }
 
 const createBlogTable = `
 CREATE TABLE IF NOT EXISTS blog(
-	id CHAR(40) NOT NULL PRIMARY KEY,
+	id CHAR(40) NOT NULL PRIMARY KEY,  
 	title TEXT,
 	content TEXT,
-	userid CHAR(40) NOT NULL,
+	userid CHAR(40) NOT NULL, 
 	username TEXT NOT NULL,
 	create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -117,8 +120,8 @@ WHERE blog.username = $1
 ORDER BY create_at DESC
 `
 
-func NewBlogPostgre(conn *sqlx.DB) blog.DB {
-	p := &sqlite{
+func NewSqlite3(conn *sqlx.DB) *Sqlite3 {
+	p := &Sqlite3{
 		db: conn,
 	}
 
@@ -129,12 +132,12 @@ func NewBlogPostgre(conn *sqlx.DB) blog.DB {
 	return p
 }
 
-func (s *sqlite) createNewTable() error {
+func (s *Sqlite3) createNewTable() error {
 	_, err := s.db.Exec(createBlogTable)
 	return err
 }
 
-func (s *sqlite) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
+func (s *Sqlite3) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
 	_, err := s.db.Exec("INSERT INTO blog (id, title, content, userid, username) VALUES ($1, $2, $3, $4, $5)", b.ID, b.Title, b.Content, b.UserID, b.UserName)
 	if err != nil {
 		return nil, err
@@ -155,7 +158,7 @@ func (s *sqlite) CreateBlog(b *blog.Blog) (*blog.Blog, error) {
 	return b, nil
 }
 
-func (s *sqlite) CreateComment(c *blog.Comment) (*blog.Comment, error) {
+func (s *Sqlite3) CreateComment(c *blog.Comment) (*blog.Comment, error) {
 	_, err := s.db.Exec("INSERT INTO comment (id, content, userid, username, blogid) VALUES ($1, $2, $3, $4, $5)", c.ID, c.Content, c.UserID, c.UserName, c.BlogID)
 	if err != nil {
 		return nil, err
@@ -181,11 +184,15 @@ type tmpBlog struct {
 	CommentUpdateAt time.Time `db:"commentupdate_at"`
 }
 
-func (s *sqlite) FindBlogByID(id string) (*blog.Blog, error) {
+func (s *Sqlite3) FindBlogByID(id string) (*blog.Blog, error) {
 	tmpblgs := make([]*tmpBlog, 0)
 	err := s.db.Select(&tmpblgs, findBlogByID, id)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(tmpblgs) == 0 {
+		return nil, errors.New("err, blog not exist")
 	}
 
 	blg := &blog.Blog{
@@ -216,7 +223,7 @@ func (s *sqlite) FindBlogByID(id string) (*blog.Blog, error) {
 	return blg, nil
 }
 
-func (s *sqlite) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
+func (s *Sqlite3) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
 	err := s.db.Select(&tmpblogs, findBlogsByTitle, "%"+title+"%")
 	if err != nil {
@@ -262,7 +269,7 @@ func (s *sqlite) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
 	return blgs, nil
 }
 
-func (s *sqlite) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
+func (s *Sqlite3) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
 	err := s.db.Select(&tmpblogs, findBlogByUserID, userid)
 	if err != nil {
@@ -308,7 +315,7 @@ func (s *sqlite) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 	return blgs, nil
 }
 
-func (s *sqlite) FindBlogsByUserName(username string) ([]*blog.Blog, error) {
+func (s *Sqlite3) FindBlogsByUserName(username string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
 	err := s.db.Select(&tmpblogs, findBlogsByUserName, username)
 	if err != nil {
@@ -354,7 +361,7 @@ func (s *sqlite) FindBlogsByUserName(username string) ([]*blog.Blog, error) {
 	return blgs, nil
 }
 
-func (s *sqlite) FindCommentsByBlogID(blogid string) ([]*blog.Comment, error) {
+func (s *Sqlite3) FindCommentsByBlogID(blogid string) ([]*blog.Comment, error) {
 	comments := make([]*blog.Comment, 0)
 	err := s.db.Select(&comments, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE blogid=$1", blogid)
 	if err != nil {
@@ -364,7 +371,7 @@ func (s *sqlite) FindCommentsByBlogID(blogid string) ([]*blog.Comment, error) {
 	return comments, nil
 }
 
-func (s *sqlite) FindCommentsByUserID(userid string) ([]*blog.Comment, error) {
+func (s *Sqlite3) FindCommentsByUserID(userid string) ([]*blog.Comment, error) {
 	comments := make([]*blog.Comment, 0)
 	err := s.db.Select(&comments, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE userid=$1", userid)
 	if err != nil {
@@ -374,7 +381,7 @@ func (s *sqlite) FindCommentsByUserID(userid string) ([]*blog.Comment, error) {
 	return comments, nil
 }
 
-func (s *sqlite) FindCommentByID(id string) (*blog.Comment, error) {
+func (s *Sqlite3) FindCommentByID(id string) (*blog.Comment, error) {
 	var c *blog.Comment
 	err := s.db.Get(c, "SELECT id, content. blogid, userid, username, create_at, update_at FROM comment WHERE id=$1", id)
 	if err != nil {
@@ -384,7 +391,7 @@ func (s *sqlite) FindCommentByID(id string) (*blog.Comment, error) {
 	return c, nil
 }
 
-func (s *sqlite) UpdateBlog(b *blog.Blog) (*blog.Blog, error) {
+func (s *Sqlite3) UpdateBlog(b *blog.Blog) (*blog.Blog, error) {
 	_, err := s.db.Exec("UPDATE blog SET content=$1, title=$2, update_at=$3 WHERE id=$4", b.Content, b.Title, time.Now(), b.ID)
 	if err != nil {
 		return nil, err
@@ -393,7 +400,7 @@ func (s *sqlite) UpdateBlog(b *blog.Blog) (*blog.Blog, error) {
 	return b, nil
 }
 
-func (s *sqlite) UpdateComment(c *blog.Comment) (*blog.Comment, error) {
+func (s *Sqlite3) UpdateComment(c *blog.Comment) (*blog.Comment, error) {
 	_, err := s.db.Exec("UPDATE comment SET content=$1, update_at=$2 WHERE id=$3", c.Content, time.Now(), c.ID)
 	if err != nil {
 		return nil, err
@@ -402,7 +409,7 @@ func (s *sqlite) UpdateComment(c *blog.Comment) (*blog.Comment, error) {
 	return c, nil
 }
 
-func (s *sqlite) DeleteBlogByID(id string) error {
+func (s *Sqlite3) DeleteBlogByID(id string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -423,12 +430,12 @@ func (s *sqlite) DeleteBlogByID(id string) error {
 	return nil
 }
 
-func (s *sqlite) DeleteCommentByID(id string) error {
+func (s *Sqlite3) DeleteCommentByID(id string) error {
 	_, err := s.db.Exec("DELETE FROM comment WHERE id=$1", id)
 	return err
 }
 
-func (s *sqlite) DeleteBlogByUserID(id string) error {
+func (s *Sqlite3) DeleteBlogByUserID(id string) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -449,7 +456,7 @@ func (s *sqlite) DeleteBlogByUserID(id string) error {
 	return nil
 }
 
-func (s *sqlite) DeleteCommentByUserID(id string) error {
+func (s *Sqlite3) DeleteCommentByUserID(id string) error {
 	_, err := s.db.Exec("DELETE FROM comment WHERE userid=$1", id)
 	return err
 }

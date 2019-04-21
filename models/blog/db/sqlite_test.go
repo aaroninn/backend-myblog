@@ -1,11 +1,9 @@
-package db
+package blog
 
 import (
 	"fmt"
 	"strconv"
 	"testing"
-
-	"hypermedlab/backend-myblog/models/blog"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
