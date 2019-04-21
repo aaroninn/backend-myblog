@@ -52,6 +52,7 @@ const defaultAge = 24 * 60 * 60
 //NewSessionsStorage return a ptr of SessionsStorageInMemory struct
 func NewSessionsStorage() *SessionsStorageInMemory {
 	session := new(SessionsStorageInMemory)
+	session.sessions = make(map[string]*Session)
 	//check every hour to make sure expireout session is deleted
 	go session.checkSessionInStorage(60 * 60 * time.Second)
 	return session
@@ -70,7 +71,10 @@ func (s *SessionsStorageInMemory) Add(session *Session) {
 func (s *SessionsStorageInMemory) Get(sessionid string) (*Session, bool) {
 	s.rw.RLock()
 	defer s.rw.RUnlock()
-	session := s.sessions[sessionid]
+	session, ok := s.sessions[sessionid]
+	if !ok {
+		return nil, false
+	}
 	if time.Now().After(session.expireTime) {
 		go s.Delete(sessionid)
 		return nil, false
