@@ -53,6 +53,7 @@ const defaultAge = 24 * 60 * 60
 func NewSessionsStorage() *SessionsStorageInMemory {
 	session := new(SessionsStorageInMemory)
 	session.sessions = make(map[string]*Session)
+	session.age = defaultAge
 	//check every hour to make sure expireout session is deleted
 	go session.checkSessionInStorage(60 * 60 * time.Second)
 	return session
@@ -110,6 +111,10 @@ func (s *SessionsStorageInMemory) Update(sessionid string, data interface{}) err
 
 	s.sessions[sessionid].data = data
 	return nil
+}
+
+func (s *SessionsStorageInMemory) SetSessionAge(age int) {
+	s.age = age
 }
 
 //SessionAmount return the amount of sessions storage in memory
@@ -191,6 +196,6 @@ func (s *SessionsStorageInMemory) RefeshSession(sessionid string) error {
 	if !ok {
 		return errSessionNotExist
 	}
-	s.sessions[sessionid].expireTime = time.Now().Add(defaultAge * time.Second)
+	s.sessions[sessionid].expireTime = time.Now().Add(time.Duration(s.age) * time.Second)
 	return nil
 }
