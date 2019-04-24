@@ -14,7 +14,7 @@ type MiddleWare struct {
 }
 
 func NewMiddleWare(sessions *session.SessionsStorageInMemory) *MiddleWare {
-	// sessions.SetAutoFresh()
+	sessions.SetAutoFresh()
 	return &MiddleWare{
 		sessions: sessions,
 	}
