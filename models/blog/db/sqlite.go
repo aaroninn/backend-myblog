@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS blog(
 	content TEXT,
 	userid CHAR(40) NOT NULL, 
 	username TEXT NOT NULL,
+	tags CHAR(40) NOT NULL,
 	create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -33,7 +34,15 @@ CREATE TABLE IF NOT EXISTS comment(
 	blogid CHAR(40) NOT NULL,
 	create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
+CREATE TABLE IF NOT EXISTS tags(
+	id CHAR(40) NOT NULL,
+	tagid CHAR(40) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS tag(
+	id CHAR(40) NOT NULL PRIMARY KEY,
+	name CHAR(40) NOT NULL UNIQUE
+);
 `
 const findBlogByID = `
 SELECT 
@@ -120,6 +129,20 @@ WHERE blog.username = $1
 ORDER BY create_at DESC
 `
 
+const searchBlog = `
+SELECT 
+id,
+title,
+content,
+userid,
+username,
+create_at,
+update_at
+WHERE blog.title LIKE  $1
+OR blog.content LIKE $2
+ORDER BY create_at DESC
+`
+
 func NewSqlite3(conn *sqlx.DB) *Sqlite3 {
 	p := &Sqlite3{
 		db: conn,
@@ -182,6 +205,16 @@ type tmpBlog struct {
 	CommentBlogID   string    `db:"commentblogid"`
 	CommentCreateAt time.Time `db:"commentcreate_at"`
 	CommentUpdateAt time.Time `db:"commentupdate_at"`
+}
+
+func (s *Sqlite3) SearchBlog(content string) ([]*blog.Blog, error) {
+	blogs := make([]*blog.Blog, 0)
+	err := s.db.Select(&blogs, searchBlog, "%"+content+"%", "%"+content+"%")
+	if err != nil {
+		return nil, err
+	}
+
+	return blogs, nil
 }
 
 func (s *Sqlite3) FindBlogByID(id string) (*blog.Blog, error) {
@@ -462,5 +495,9 @@ func (s *Sqlite3) DeleteCommentByUserID(id string) error {
 }
 
 func sortBlogByTimeDESC(blogs []*blog.Blog) {
+
+}
+
+func FindTagsByTagsID(id string) {
 
 }
