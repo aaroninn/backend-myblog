@@ -27,3 +27,13 @@ type UpdateComment struct {
 	Content   string `json:"content"`
 	UserID    string
 }
+
+type CreateTag struct {
+	BlogID string `json:"blogid"`
+	Name   string `json:"name"`
+}
+
+type DeleteTag struct {
+	BlogID string `json:"blogid"`
+	TagID  string `json:"tagid"`
+}

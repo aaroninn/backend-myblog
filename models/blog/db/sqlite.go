@@ -1,10 +1,11 @@
-package blog
+package db
 
 import (
 	"hypermedlab/backend-myblog/models/blog"
 	"hypermedlab/backend-myblog/pkgs/sort"
 	"hypermedlab/backend-myblog/pkgs/uuid"
 
+	"database/sql"
 	"errors"
 	"time"
 
@@ -14,134 +15,6 @@ import (
 type Sqlite3 struct {
 	db *sqlx.DB
 }
-
-const createBlogTable = `
-CREATE TABLE IF NOT EXISTS blog(
-	id CHAR(40) NOT NULL PRIMARY KEY,  
-	title TEXT,
-	content TEXT,
-	userid CHAR(40) NOT NULL, 
-	username TEXT NOT NULL,
-	tags CHAR(40) NOT NULL,
-	create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE IF NOT EXISTS comment(
-	id CHAR(40) NOT NULL PRIMARY KEY,
-	content TEXT NOT NULL,
-	userid CHAR(40) NOT NULL,
-	username TEXT NOT NULL,
-	blogid CHAR(40) NOT NULL,
-	create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE IF NOT EXISTS tags(
-	id CHAR(40) NOT NULL,
-	tagid CHAR(40) NOT NULL
-);
-CREATE TABLE IF NOT EXISTS tag(
-	id CHAR(40) NOT NULL PRIMARY KEY,
-	name CHAR(40) NOT NULL UNIQUE
-);
-`
-const findBlogByID = `
-SELECT 
-blog.id AS id,
-blog.title AS title,
-blog.content AS content,
-blog.userid AS userid,
-blog.username AS username,
-blog.create_at AS create_at,
-blog.update_at AS update_at,
-comment.id AS commentid,
-comment.content AS commentcontent,
-comment.userid AS commentuserid,
-comment.username AS commentusername,
-comment.blogid AS commentblogid,
-comment.create_at AS commentcreate_at,
-comment.update_at As commentupdate_at
-FROM comment LEFT JOIN blog
-ON blog.id = comment.blogid
-WHERE blog.id = $1
-`
-
-const findBlogByUserID = `
-SELECT 
-blog.id AS id,
-blog.title AS title,
-blog.content AS content,
-blog.userid AS userid,
-blog.username AS username,
-blog.create_at AS create_at,
-blog.update_at AS update_at,
-comment.id AS commentid,
-comment.content AS commentcontent,
-comment.userid AS commentuserid,
-comment.username AS commentusername,
-comment.blogid AS commentblogid,
-comment.create_at AS commentcreate_at,
-comment.update_at As commentupdate_at
-FROM comment LEFT JOIN blog
-ON blog.id = comment.blogid
-WHERE blog.userid = $1
-ORDER BY create_at DESC
-`
-const findBlogsByTitle = `
-SELECT 
-blog.id AS id,
-blog.title AS title,
-blog.content AS content,
-blog.userid AS userid,
-blog.username AS username,
-blog.create_at AS create_at,
-blog.update_at AS update_at,
-comment.id AS commentid,
-comment.content AS commentcontent,
-comment.userid AS commentuserid,
-comment.username AS commentusername,
-comment.blogid AS commentblogid,
-comment.create_at AS commentcreate_at,
-comment.update_at As commentupdate_at
-FROM comment LEFT JOIN blog
-ON blog.id = comment.blogid
-WHERE blog.title LIKE $1
-`
-
-const findBlogsByUserName = `
-SELECT 
-blog.id AS id,
-blog.title AS title,
-blog.content AS content,
-blog.userid AS userid,
-blog.username AS username,
-blog.create_at AS create_at,
-blog.update_at AS update_at,
-comment.id AS commentid,
-comment.content AS commentcontent,
-comment.userid AS commentuserid,
-comment.username AS commentusername,
-comment.blogid AS commentblogid,
-comment.create_at AS commentcreate_at,
-comment.update_at As commentupdate_at
-FROM comment LEFT JOIN blog
-ON blog.id = comment.blogid
-WHERE blog.username = $1
-ORDER BY create_at DESC
-`
-
-const searchBlog = `
-SELECT 
-id,
-title,
-content,
-userid,
-username,
-create_at,
-update_at
-WHERE blog.title LIKE  $1
-OR blog.content LIKE $2
-ORDER BY create_at DESC
-`
 
 func NewSqlite3(conn *sqlx.DB) *Sqlite3 {
 	p := &Sqlite3{
@@ -191,23 +64,25 @@ func (s *Sqlite3) CreateComment(c *blog.Comment) (*blog.Comment, error) {
 }
 
 type tmpBlog struct {
-	Title           string    `db:"title"`
-	Content         string    `db:"content"`
-	ID              string    `db:"id"`
-	UserID          string    `db:"userid"`
-	UserName        string    `db:"username"`
-	CreateAt        time.Time `db:"create_at"`
-	UpdateAt        time.Time `db:"update_at"`
-	CommentID       string    `db:"commentid"`
-	CommentUserID   string    `db:"commentuserid"`
-	CommentUserName string    `db:"commentusername"`
-	CommentContent  string    `db:"commentcontent"`
-	CommentBlogID   string    `db:"commentblogid"`
-	CommentCreateAt time.Time `db:"commentcreate_at"`
-	CommentUpdateAt time.Time `db:"commentupdate_at"`
+	Title           string         `db:"title"`
+	Content         string         `db:"content"`
+	ID              string         `db:"id"`
+	UserID          string         `db:"userid"`
+	UserName        string         `db:"username"`
+	CreateAt        time.Time      `db:"create_at"`
+	UpdateAt        time.Time      `db:"update_at"`
+	CommentID       string         `db:"commentid"`
+	CommentUserID   string         `db:"commentuserid"`
+	CommentUserName string         `db:"commentusername"`
+	CommentContent  string         `db:"commentcontent"`
+	CommentBlogID   string         `db:"commentblogid"`
+	CommentCreateAt time.Time      `db:"commentcreate_at"`
+	CommentUpdateAt time.Time      `db:"commentupdate_at"`
+	TagID           sql.NullString `db:"tagid"`
+	TagName         sql.NullString `db:"tagname"`
 }
 
-func (s *Sqlite3) SearchBlog(content string) ([]*blog.Blog, error) {
+func (s *Sqlite3) FindBlogsByContent(content string) ([]*blog.Blog, error) {
 	blogs := make([]*blog.Blog, 0)
 	err := s.db.Select(&blogs, searchBlog, "%"+content+"%", "%"+content+"%")
 	if err != nil {
@@ -238,21 +113,37 @@ func (s *Sqlite3) FindBlogByID(id string) (*blog.Blog, error) {
 		UpdateAt: tmpblgs[0].UpdateAt,
 	}
 
+	commentsMap := make(map[string]bool)
+	tagsMap := make(map[string]bool)
 	comments := make([]*blog.Comment, 0)
+	tags := make([]*blog.Tag, 0)
 	for _, tmpblg := range tmpblgs {
-		comment := &blog.Comment{
-			ID:       tmpblg.CommentID,
-			Content:  tmpblg.CommentContent,
-			UserID:   tmpblg.CommentUserID,
-			UserName: tmpblg.CommentUserName,
-			CreateAt: tmpblg.CommentCreateAt,
-			UpdateAt: tmpblg.CommentUpdateAt,
+		if _, ok := commentsMap[tmpblg.CommentID]; !ok {
+			comment := &blog.Comment{
+				ID:       tmpblg.CommentID,
+				Content:  tmpblg.CommentContent,
+				UserID:   tmpblg.CommentUserID,
+				UserName: tmpblg.CommentUserName,
+				CreateAt: tmpblg.CommentCreateAt,
+				UpdateAt: tmpblg.CommentUpdateAt,
+			}
+			comments = append(comments, comment)
+			commentsMap[tmpblg.CommentID] = true
 		}
-		comments = append(comments, comment)
+
+		if _, ok := tagsMap[tmpblg.TagID.String]; !ok {
+			tag := &blog.Tag{
+				ID:   tmpblg.TagID.String,
+				Name: tmpblg.TagName.String,
+			}
+			tags = append(tags, tag)
+			tagsMap[tmpblg.TagID.String] = true
+		}
 	}
 	if len(comments) > 1 {
 		blg.Comment = comments[1:]
 	}
+	blg.Tags = tags
 	return blg, nil
 }
 
@@ -351,6 +242,52 @@ func (s *Sqlite3) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 func (s *Sqlite3) FindBlogsByUserName(username string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
 	err := s.db.Select(&tmpblogs, findBlogsByUserName, username)
+	if err != nil {
+		return nil, err
+	}
+
+	blogs := make(map[string]*blog.Blog, 0)
+	comments := make(map[string][]*blog.Comment, 0)
+	for _, tmpblog := range tmpblogs {
+		blogs[tmpblog.ID] = &blog.Blog{
+			UserID:   tmpblog.UserID,
+			UserName: tmpblog.UserName,
+			Title:    tmpblog.Title,
+			Content:  tmpblog.Content,
+			ID:       tmpblog.ID,
+			CreateAt: tmpblog.CreateAt,
+			UpdateAt: tmpblog.UpdateAt,
+		}
+		cs := comments[tmpblog.ID]
+		c := &blog.Comment{
+			ID:       tmpblog.CommentID,
+			Content:  tmpblog.CommentContent,
+			UserID:   tmpblog.CommentUserID,
+			UserName: tmpblog.CommentUserName,
+			BlogID:   tmpblog.ID,
+			CreateAt: tmpblog.CommentCreateAt,
+			UpdateAt: tmpblog.CreateAt,
+		}
+		cs = append(cs, c)
+		comments[tmpblog.ID] = cs
+	}
+
+	blgs := make([]*blog.Blog, 0)
+	for _, blg := range blogs {
+		if len(comments[blg.ID]) > 1 {
+			blg.Comment = comments[blg.ID][1:]
+		}
+		blgs = append(blgs, blg)
+	}
+
+	sort.Sort(blgs)
+
+	return blgs, nil
+}
+
+func (s *Sqlite3) FindBlogsByTagID(id string) ([]*blog.Blog, error) {
+	tmpblogs := make([]*tmpBlog, 0)
+	err := s.db.Select(&tmpblogs, findBlogsByTagID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -494,10 +431,39 @@ func (s *Sqlite3) DeleteCommentByUserID(id string) error {
 	return err
 }
 
-func sortBlogByTimeDESC(blogs []*blog.Blog) {
+func (s *Sqlite3) CreateNewTagForBlog(tag *blog.Tag) (*blog.Tag, error) {
+	_, err := s.db.Exec("INSERT INTO tag (id, name) VALUES ($1, $2)", tag.ID, tag.Name)
+	if err != nil {
+		return nil, err
+	}
 
+	return tag, nil
 }
 
-func FindTagsByTagsID(id string) {
+func (s *Sqlite3) AllocateTagForBlog(tagid, blogid string) error {
+	_, err := s.db.Exec("INSERT INTO tags (tag_id, blog_id) VALUES ($1, $2)", tagid, blogid)
+	if err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (s *Sqlite3) FindTagByName(name string) (*blog.Tag, error) {
+	tag := new(blog.Tag)
+	err := s.db.Get(tag, "SELECT * FROM tag WHERE name=$1", name)
+	if err != nil {
+		return nil, err
+	}
+
+	return tag, nil
+}
+
+func (s *Sqlite3) DeleteTag(tagid, blogid string) error {
+	_, err := s.db.Exec("DELETE * FROM tags WHERE tag_id=$1 AND blog_id=$2", tagid, blogid)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

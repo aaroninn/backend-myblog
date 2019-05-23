@@ -64,20 +64,33 @@ func (s *Service) CreateComment(form *forms.CreateComment) (*mBlog.Blog, error) 
 	return b, nil
 }
 
-func (s *Service) FindBlogByID(id string) (*mBlog.Blog, error) {
-	return s.db.FindBlogByID(id)
-}
-
-func (s *Service) FindBlogsByUserID(userid string) ([]*mBlog.Blog, error) {
-	return s.db.FindBlogsByUserID(userid)
+func (s *Service) FindBlogsByContent(content string) ([]*mBlog.Blog, error) {
+	return s.db.FindBlogsByContent(content)
 }
 
 func (s *Service) FindBlogsByTitle(title string) ([]*mBlog.Blog, error) {
 	return s.db.FindBlogsByTitle(title)
 }
 
+func (s *Service) FindBlogByID(id string) (*mBlog.Blog, error) {
+	blog, err := s.db.FindBlogByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return blog, nil
+}
+
+func (s *Service) FindBlogsByUserID(userid string) ([]*mBlog.Blog, error) {
+	return s.db.FindBlogsByUserID(userid)
+}
+
 func (s *Service) FindBlogsByUserName(username string) ([]*mBlog.Blog, error) {
 	return s.db.FindBlogsByUserName(username)
+}
+
+func (s *Service) FindBlogsByTagID(id string) ([]*mBlog.Blog, error) {
+	return s.db.FindBlogsByTagID(id)
 }
 
 func (s *Service) FindCommentByID(id string) (*mBlog.Comment, error) {
@@ -140,4 +153,24 @@ func (s *Service) DeleteCommentByID(id string) error {
 
 func (s *Service) DeleteCommentByUserID(id string) error {
 	return s.db.DeleteCommentByUserID(id)
+}
+
+func (s *Service) CreateTagForBlog(form *forms.CreateTag) error {
+	tag, err := s.db.FindTagByName(form.Name)
+	if err != nil {
+		tag = new(mBlog.Tag)
+		tag.Name = form.Name
+		tag.ID = uuid.NewV1()
+		s.db.CreateNewTagForBlog(tag)
+	}
+
+	return s.db.AllocateTagForBlog(tag.ID, form.BlogID)
+}
+
+// func (s *Service) UpdateTagForBLog(form *forms.CreateTag) error {
+
+// }
+
+func (s *Service) DeleteTag(form *forms.DeleteTag) error {
+	return s.db.DeleteTag(form.TagID, form.BlogID)
 }

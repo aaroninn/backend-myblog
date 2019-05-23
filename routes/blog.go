@@ -33,6 +33,8 @@ func (b *Blog) Init() {
 	blogroute.GET("/title/:title", middlewares.IPCount, b.findBlogsByTitle)
 	blogroute.GET("/userid/:userid", middlewares.IPCount, b.findBlogByUserID)
 	blogroute.GET("/username/:username", middlewares.IPCount, b.findBlogsByUserName)
+	blogroute.GET("/content/:content", middlewares.IPCount, b.findBlogsByContent)
+	blogroute.GET("/tag/:tagid", b.findBlogsByTag)
 	blogroute.PUT("/:id", middlewares.IPCount, b.middleware.AuthToken, b.updateBlog)
 	blogroute.DELETE("/id/:id", middlewares.IPCount, b.middleware.AuthToken, b.deleteBlogByID)
 	blogroute.DELETE("/userid/:userid", middlewares.IPCount, b.middleware.AuthToken, b.deleteBlogsByUserID)
@@ -44,6 +46,10 @@ func (b *Blog) Init() {
 	commentroute.PUT("/:id", middlewares.IPCount, b.middleware.AuthToken, b.updateComment)
 	commentroute.DELETE("/id/:id", middlewares.IPCount, b.middleware.AuthToken, b.deleteCommentByID)
 	commentroute.DELETE("/userid/:userid", middlewares.IPCount, b.middleware.AuthToken, b.deleteCommentsByUserID)
+
+	tagroute := b.Engine.Group("/tag")
+	tagroute.POST("", middlewares.IPCount, b.middleware.AuthToken, b.createTag)
+	tagroute.DELETE("", middlewares.IPCount, b.middleware.AuthToken, b.deleteTag)
 }
 
 func (b *Blog) createBlog(ctx *gin.Context) {
@@ -71,7 +77,7 @@ func (b *Blog) createBlog(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, blg)
+	ctx.JSON(201, blg)
 }
 
 func (b *Blog) createComment(ctx *gin.Context) {
@@ -100,7 +106,17 @@ func (b *Blog) createComment(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, blg)
+	ctx.JSON(201, blg)
+}
+
+func (b *Blog) createTag(ctx *gin.Context) {
+	form := new(forms.CreateTag)
+	err := b.srv.CreateTagForBlog(form)
+	if err != nil {
+		ctx.String(400, err.Error())
+		return
+	}
+	ctx.String(201, "created")
 }
 
 func (b *Blog) findBlogByID(ctx *gin.Context) {
@@ -127,6 +143,19 @@ func (b *Blog) findBlogsByTitle(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, blogs)
+}
+
+func (b *Blog) findBlogsByContent(ctx *gin.Context) {
+	content := ctx.Param("content")
+	blogs, err := b.srv.FindBlogsByContent(content)
+	if err != nil {
+		log.Println(err)
+		ctx.String(400, err.Error())
+		return
+	}
+
+	ctx.JSON(200, blogs)
+
 }
 
 func (b *Blog) findBlogsByUser(ctx *gin.Context) {
@@ -170,6 +199,17 @@ func (b *Blog) findBlogsByUserName(ctx *gin.Context) {
 
 	ctx.JSON(200, blogs)
 
+}
+
+func (b *Blog) findBlogsByTag(ctx *gin.Context) {
+	tagid := ctx.Param("tagid")
+	blogs, err := b.srv.FindBlogsByTagID(tagid)
+	if err != nil {
+		ctx.String(400, err.Error())
+		return
+	}
+
+	ctx.JSON(200, blogs)
 }
 
 func (b *Blog) findCommentByID(ctx *gin.Context) {
@@ -306,6 +346,23 @@ func (b *Blog) deleteCommentsByUserID(ctx *gin.Context) {
 	err := b.srv.DeleteCommentByUserID(claims.ID)
 	if err != nil {
 		log.Println(err)
+		ctx.String(400, err.Error())
+		return
+	}
+
+	ctx.String(200, "delete success")
+}
+
+func (b *Blog) deleteTag(ctx *gin.Context) {
+	form := new(forms.DeleteTag)
+	err := ctx.BindJSON(form)
+	if err != nil {
+		ctx.String(400, err.Error())
+		return
+	}
+
+	err = b.srv.DeleteTag(form)
+	if err != nil {
 		ctx.String(400, err.Error())
 		return
 	}

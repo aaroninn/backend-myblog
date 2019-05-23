@@ -49,7 +49,6 @@ func buildContainer() *dig.Container {
 	})
 
 	return container
-
 }
 
 func main() {
