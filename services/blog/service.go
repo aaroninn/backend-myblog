@@ -7,6 +7,7 @@ import (
 	"hypermedlab/backend-myblog/pkgs/uuid"
 
 	"time"
+	"log"
 )
 
 type Service struct {
@@ -156,6 +157,7 @@ func (s *Service) DeleteCommentByUserID(id string) error {
 }
 
 func (s *Service) CreateTagForBlog(form *forms.CreateTag) error {
+	log.Println(form)
 	tag, err := s.db.FindTagByName(form.Name)
 	if err != nil {
 		tag = new(mBlog.Tag)

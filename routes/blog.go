@@ -111,7 +111,12 @@ func (b *Blog) createComment(ctx *gin.Context) {
 
 func (b *Blog) createTag(ctx *gin.Context) {
 	form := new(forms.CreateTag)
-	err := b.srv.CreateTagForBlog(form)
+	err := ctx.BindJSON(form)
+	if err != nil {
+		ctx.String(400, err.Error())
+	}
+
+	err = b.srv.CreateTagForBlog(form)
 	if err != nil {
 		ctx.String(400, err.Error())
 		return

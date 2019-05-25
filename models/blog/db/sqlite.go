@@ -195,7 +195,7 @@ func (s *Sqlite3) FindBlogsByTitle(title string) ([]*blog.Blog, error) {
 
 func (s *Sqlite3) FindBlogsByUserID(userid string) ([]*blog.Blog, error) {
 	tmpblogs := make([]*tmpBlog, 0)
-	err := s.db.Select(&tmpblogs, findBlogByUserID, userid)
+	err := s.db.Select(&tmpblogs, findBlogsByUserID, userid)
 	if err != nil {
 		return nil, err
 	}

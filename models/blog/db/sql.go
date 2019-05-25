@@ -84,7 +84,7 @@ LEFT JOIN (
 WHERE blog.id = $1
 `
 
-const findBlogByUserID = `
+const findBlogsByUserID = `
 SELECT 
 blog.id AS id,
 blog.title AS title,
@@ -99,7 +99,7 @@ comment.userid AS commentuserid,
 comment.username AS commentusername,
 comment.blogid AS commentblogid,
 comment.create_at AS commentcreate_at,
-comment.update_at As commentupdate_at,
+comment.update_at As commentupdate_at
 FROM comment LEFT JOIN blog
 ON blog.id = comment.blogid
 WHERE blog.userid = $1
