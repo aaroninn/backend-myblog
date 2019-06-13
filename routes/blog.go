@@ -139,7 +139,6 @@ func (b *Blog) findBlogByID(ctx *gin.Context) {
 }
 
 func (b *Blog) findBlogsByTitle(ctx *gin.Context) {
-
 	title := ctx.Param("title")
 	blogs, err := b.srv.FindBlogsByTitle(title)
 	if err != nil {
