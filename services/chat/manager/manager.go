@@ -13,6 +13,10 @@ type Manager struct {
 	conns map[string]*websocket.Conn
 }
 
+type Rooms struct {
+	rooms map[string]*chat.Room
+}
+
 func NewManager() {
 	return new(Manager)
 }
@@ -23,6 +27,7 @@ func (m *Manager) AddRoom(room *chat.Room) {
 	m.rooms[room.ID] = room
 }
 
-func (m *Manager) AddConn(userid string) {
+func (m *Manager) AddConn(userid string, conn *websocket.Conn) {
+	m.rw.Lock()
 
 }
